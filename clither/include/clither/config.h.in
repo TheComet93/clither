@@ -1,0 +1,11 @@
+/* --------------------------------------------------------------
+ * Configures prerequisits for this library
+ * --------------------------------------------------------------*/
+
+#ifndef @PROJECT_NAME@_CONFIG_H
+#   define @PROJECT_NAME@_CONFIG_H
+
+#   include "util/config.h"
+
+
+#endif /* @PROJECT_NAME@_CONFIG_H */

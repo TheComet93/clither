@@ -1,0 +1,38 @@
+/* --------------------------------------------------------------
+ * Configures prerequisites for this library
+ * --------------------------------------------------------------*/
+
+#ifndef @PROJECT_NAME@_CONFIG_HPP
+#   define @PROJECT_NAME@_CONFIG_HPP
+
+#   include "util/export.h"
+
+    /* --------------------------------------------------------------
+     * build settings
+     * --------------------------------------------------------------*/
+
+    #define @PROJECT_NAME@_@BUILD_TYPE@
+
+    #cmakedefine ENABLE_MEMORY_DEBUGGING
+#   ifdef ENABLE_MEMORY_DEBUGGING
+        #cmakedefine ENABLE_MEMORY_BACKTRACE
+        #cmakedefine ENABLE_LOG_TIMESTAMPS
+        #cmakedefine ENABLE_MULTITHREADING
+        #cmakedefine ENABLE_MEMORY_EXPLICIT_MALLOC_FAILURES
+#   endif
+
+#   ifdef ENABLE_MULTITHREADING
+        #cmakedefine ENABLE_THREAD_POOL
+        #cmakedefine ENABLE_RING_BUFFER_REALLOC
+#       define RING_BUFFER_FIXED_SIZE @RING_BUFFER_FIXED_SIZE@
+#       define RING_BUFFER_MAX_SIZE @RING_BUFFER_MAX_SIZE@
+#   endif
+
+#   define SIZEOF_VOID_PTR  @SIZEOF_VOID_PTR@
+#   define SIZEOF_INT       @SIZEOF_INT@
+#   define SIZEOF_FLOAT     @SIZEOF_FLOAT@
+#   define SIZEOF_DOUBLE    @SIZEOF_DOUBLE@
+
+    #cmakedefine ENABLE_WINDOWS_EX
+
+#endif /* @PROJECT_NAME@_CONFIG_HPP */

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libyaml.a  CMakeFiles/yaml.dir/src/scanner.o CMakeFiles/yaml.dir/src/dumper.o CMakeFiles/yaml.dir/src/emitter.o CMakeFiles/yaml.dir/src/loader.o CMakeFiles/yaml.dir/src/parser.o CMakeFiles/yaml.dir/src/api.o CMakeFiles/yaml.dir/src/writer.o CMakeFiles/yaml.dir/src/reader.o
+/usr/bin/ranlib libyaml.a
