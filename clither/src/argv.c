@@ -32,9 +32,8 @@ argv_parse(int argc, char** argv)
     static const int DOUBLE_DASH = 2;
 
     /* allocate argument object (return value) */
-    arg_obj = (struct arg_obj_t*)MALLOC(sizeof(struct arg_obj_t));
-    if(!arg_obj)
-        OUT_OF_MEMORY("argv_parse()", malloc_arg_obj_failed);
+    if((arg_obj = (struct arg_obj_t*)MALLOC(sizeof(struct arg_obj_t), "argv_parse()")) == NULL)
+        goto malloc_arg_obj_failed;
     memset(arg_obj, 0, sizeof(struct arg_obj_t));
 
     /* game should be run by default */

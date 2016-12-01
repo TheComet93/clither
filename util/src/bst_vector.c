@@ -11,7 +11,7 @@ struct bstv_t*
 bstv_create(void)
 {
     struct bstv_t* bstv;
-    if(!(bstv = (struct bstv_t*)MALLOC(sizeof *bstv)))
+    if(!(bstv = (struct bstv_t*)MALLOC(sizeof *bstv, "bstv_create()")))
     	return NULL;
     bstv_init(bstv);
     return bstv;

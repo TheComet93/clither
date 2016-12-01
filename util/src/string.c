@@ -70,7 +70,7 @@ cat_strings(uint32_t num_strs, ...)
     	total_length += safe_strlen(va_arg(ap, char*));
     va_end(ap);
 
-    buffer = (char*)MALLOC((total_length+1) * sizeof(char));
+    buffer = (char*)MALLOC((total_length+1) * sizeof(char), "cat_strings()");
     if(!buffer)
     {
     	fprintf(stderr, "malloc() failed in cat_strings() -- not enough memory\n");
@@ -94,7 +94,7 @@ malloc_string(const char* str)
     char* buffer;
     assert(str);
 
-    buffer = (char*)MALLOC((strlen(str)+1) * sizeof(char));
+    buffer = (char*)MALLOC((strlen(str)+1) * sizeof(char), "malloc_string()");
     if(!buffer)
     {
     	fprintf(stderr, "malloc() failed in malloc_string() -- not enough memory\n");
@@ -121,7 +121,7 @@ cat_wstrings(uint32_t num_strs, ...)
     	total_length += safe_wcslen(va_arg(ap, wchar_t*));
     va_end(ap);
 
-    buffer = (wchar_t*)MALLOC((total_length+1) * sizeof(wchar_t));
+    buffer = (wchar_t*)MALLOC((total_length+1) * sizeof(wchar_t), "cat_wstrings()");
     if(!buffer)
     {
     	fprintf(stderr, "malloc() failed in cat_wstrings() -- not enough memory\n");
@@ -145,7 +145,7 @@ malloc_wstring(const wchar_t* wcs)
     wchar_t* buffer;
     assert(wcs);
 
-    buffer = (wchar_t*)MALLOC((wcslen(wcs)+1) * sizeof(wchar_t));
+    buffer = (wchar_t*)MALLOC((wcslen(wcs)+1) * sizeof(wchar_t), "malloc_wstring()");
     if(!buffer)
     {
     	fprintf(stderr, "malloc() failed in malloc_wstring() -- not enough memory\n");
@@ -200,7 +200,7 @@ strtowcs(const char* str)
 
     len = strlen(str);
 
-    wcs = (wchar_t*)MALLOC((len + 1) * sizeof(wchar_t));
+    wcs = (wchar_t*)MALLOC((len + 1) * sizeof(wchar_t), "strtowcs()");
     if(!wcs)
     {
     	fprintf(stderr, "malloc() failed in strtowcs() -- not enough memory\n");
@@ -225,7 +225,7 @@ wcstostr(const wchar_t* wcs)
 
     len = wcslen(wcs);
 
-    str = (char*)MALLOC((len + 1) * sizeof(char));
+    str = (char*)MALLOC((len + 1) * sizeof(char), "wcstostr()");
     if(!str)
     {
     	fprintf(stderr, "malloc() failed in wcstostr() -- not enough memory\n");

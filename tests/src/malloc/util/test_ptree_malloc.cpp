@@ -69,7 +69,7 @@ TEST(NAME, set_parent_fail_later)
 
 static int* dup_value(int* value)
 {
-    int* ret = (int*)MALLOC(sizeof *value);
+    int* ret = (int*)MALLOC(sizeof *value, "");
     if(!ret)
         return NULL;
     *ret = *value;
@@ -83,7 +83,7 @@ static void free_value(int* value)
 
 TEST(NAME, duplicate_tree_fail_later)
 {
-    int *a=(int*)MALLOC(sizeof(int)), *b=(int*)MALLOC(sizeof(int));
+    int *a=(int*)MALLOC(sizeof(int), ""), *b=(int*)MALLOC(sizeof(int), "");
     *a = 6, *b = 3;
     struct ptree_t* tree = ptree_create(NULL);
     struct ptree_t* n3 = ptree_set(tree, "1.2.3", a);
@@ -123,7 +123,7 @@ TEST(NAME, duplicate_tree_fail_later)
 
 TEST(NAME, duplicate_into_existing_node_fail_later)
 {
-    int *a=(int*)MALLOC(sizeof(int)), *b=(int*)MALLOC(sizeof(int));
+    int *a=(int*)MALLOC(sizeof(int), ""), *b=(int*)MALLOC(sizeof(int), "");
     *a = 6, *b = 3;
     struct ptree_t* tree = ptree_create(NULL);
     struct ptree_t* n3 = ptree_set(tree, "1.2.3", a);

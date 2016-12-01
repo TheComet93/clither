@@ -34,8 +34,8 @@ struct bsthv_t*
 bsthv_create(void)
 {
     struct bsthv_t* bsthv;
-    if(!(bsthv = (struct bsthv_t*)MALLOC(sizeof *bsthv)))
-    	return NULL;
+    if(!(bsthv = (struct bsthv_t*)MALLOC(sizeof *bsthv, "bsthv_create()")))
+        return NULL;
     bsthv_init(bsthv);
     return bsthv;
 }
@@ -45,7 +45,6 @@ void
 bsthv_init(struct bsthv_t* bsthv)
 {
     assert(bsthv);
-    bsthv->count = 0;
     ordered_vector_init(&bsthv->vector, sizeof(struct bsthv_key_value_t));
 }
 
@@ -76,27 +75,27 @@ bsthv_find_lower_bound(const struct bsthv_t* bsthv, uint32_t hash)
 
     /* if the vector has no data, return NULL */
     if(!len)
-    	return NULL;
+        return NULL;
 
     while(len > 0)
     {
-    	half = len >> 1;
-    	middle = data + half;
-    	if(middle->hash < hash)
-    	{
-    		data = middle;
-    		++data;
-    		len = len - half - 1;
-    	}
-    	else
-    		len = half;
+        half = len >> 1;
+        middle = data + half;
+        if(middle->hash < hash)
+        {
+            data = middle;
+            ++data;
+            len = len - half - 1;
+        }
+        else
+            len = half;
     }
 
     /* if "data" is pointing outside of the valid elements in the vector, also return NULL */
     if((intptr_t)data >= (intptr_t)bsthv->vector.data + (intptr_t)bsthv->vector.count * (intptr_t)bsthv->vector.element_size)
-    	return NULL;
+        return NULL;
     else
-    	return data;
+        return data;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -112,40 +111,37 @@ bsthv_insert(struct bsthv_t* bsthv, const char* key, void* value)
     /* hash collision */
     if(lower_bound && lower_bound->hash == hash)
     {
-    	/*
-    	 * Get to the end of the chain and make sure no existing keys match the
-    	 * new key.
-    	 */
-    	struct bsthv_value_chain_t* vc = &lower_bound->value_chain;
-    	do
-    	{
-    		/* sanity check - all values in chain must have a key */
-    		assert(vc->key);
+        /*
+         * Get to the end of the chain and make sure no existing keys match the
+         * new key.
+         */
+        struct bsthv_value_chain_t* vc = &lower_bound->value_chain;
+        do
+        {
+            /* sanity check - all values in chain must have a key */
+            assert(vc->key);
 
-    		if(strcmp(key, vc->key) == 0)
-    			return 0; /* key exists, abort */
+            if(strcmp(key, vc->key) == 0)
+                return 0; /* key exists, abort */
 
-    	} while(vc->next && (vc = vc->next));
+        } while(vc->next && (vc = vc->next));
 
-    	/* allocate and link a new value at the end of the chain */
-    	vc->next = (struct bsthv_value_chain_t*)MALLOC(sizeof *vc);
-    	if(!vc->next)
-    		return 0;
-    	memset(vc->next, 0, sizeof *vc->next);
-    	/* key */
-    	vc->next->key = malloc_string(key);
-    	if(!vc->next->key)
-    	{
-    		FREE(vc->next);
-    		return 0;
-    	}
-    	/* value */
-    	vc->next->value = value;
+        /* allocate and link a new value at the end of the chain */
+        vc->next = (struct bsthv_value_chain_t*)MALLOC(sizeof *vc, "bsthv_insert()");
+        if(!vc->next)
+            return 0;
+        memset(vc->next, 0, sizeof *vc->next);
+        /* key */
+        vc->next->key = malloc_string(key);
+        if(!vc->next->key)
+        {
+            FREE(vc->next);
+            return 0;
+        }
+        /* value */
+        vc->next->value = value;
 
-    	/* inc counter to keep track of number of elements */
-    	++bsthv->count;
-
-    	return 1;
+        return 1;
     }
 
     /*
@@ -153,12 +149,12 @@ bsthv_insert(struct bsthv_t* bsthv, const char* key, void* value)
      * there is already data in the bsthv.
      */
     if(!lower_bound)
-    	new_kv = (struct bsthv_key_value_t*)ordered_vector_push_emplace(&bsthv->vector);
+        new_kv = (struct bsthv_key_value_t*)ordered_vector_push_emplace(&bsthv->vector);
     else
-    	new_kv = ordered_vector_insert_emplace(&bsthv->vector,
-    			lower_bound - (struct bsthv_key_value_t*)bsthv->vector.data);
+        new_kv = ordered_vector_insert_emplace(&bsthv->vector,
+                lower_bound - (struct bsthv_key_value_t*)bsthv->vector.data);
     if(!new_kv)
-    	return 0;
+        return 0;
 
     memset(new_kv, 0, sizeof *new_kv);
     new_kv->hash = hash;
@@ -166,12 +162,9 @@ bsthv_insert(struct bsthv_t* bsthv, const char* key, void* value)
     new_kv->value_chain.key = malloc_string(key);
     if(!new_kv->value_chain.key)
     {
-    	ordered_vector_erase_element(&bsthv->vector, new_kv);
-    	return 0;
+        ordered_vector_erase_element(&bsthv->vector, new_kv);
+        return 0;
     }
-
-    /* inc counter to keep track of number of elements */
-    	++bsthv->count;
 
     return 1;
 }
@@ -195,7 +188,7 @@ bsthv_set(struct bsthv_t* bsthv, const char* key, void* value)
     hash = bsthv_hash_string(key);
     kv = bsthv_find_lower_bound(bsthv, hash);
     if(!kv || kv->hash != hash)
-    	return;
+        return;
 
     /*
      * If there are no further values in the value chain, this must be the
@@ -203,8 +196,8 @@ bsthv_set(struct bsthv_t* bsthv, const char* key, void* value)
      */
     if(!kv->value_chain.next)
     {
-    	kv->value_chain.value = value;
-    	return;
+        kv->value_chain.value = value;
+        return;
     }
 
     /*
@@ -214,12 +207,12 @@ bsthv_set(struct bsthv_t* bsthv, const char* key, void* value)
     vc = &kv->value_chain;
     do
     {
-    	if(strcmp(key, vc->key) == 0)
-    	{
-    		vc->value = value;
-    		return;
-    	}
-    	vc = vc->next;
+        if(strcmp(key, vc->key) == 0)
+        {
+            vc->value = value;
+            return;
+        }
+        vc = vc->next;
     } while(vc);
 }
 
@@ -241,14 +234,14 @@ bsthv_find(const struct bsthv_t* bsthv, const char* key)
     hash = bsthv_hash_string(key);
     data = bsthv_find_lower_bound(bsthv, hash);
     if(!data || data->hash != hash)
-    	return NULL;
+        return NULL;
 
     /*
      * If there is only one value in the chain then it must be the value we're
      * looking for.
      */
     if(!data->value_chain.next)
-    	return data->value_chain.value;
+        return data->value_chain.value;
 
     /*
      * Iterate chain and string compare each key with the key we're looking for
@@ -257,10 +250,10 @@ bsthv_find(const struct bsthv_t* bsthv, const char* key)
     vc = &data->value_chain;
     do
     {
-    	if(strcmp(key, vc->key) == 0)
-    		return vc->value;
+        if(strcmp(key, vc->key) == 0)
+            return vc->value;
 
-    	vc = vc->next;
+        vc = vc->next;
     } while(vc);
 
     return NULL;
@@ -273,13 +266,13 @@ bsthv_find_element(const struct bsthv_t* bsthv, const void* value)
     assert(bsthv);
 
     ORDERED_VECTOR_FOR_EACH(&bsthv->vector, struct bsthv_key_value_t, kv)
-    	struct bsthv_value_chain_t* vc = &kv->value_chain;
-    	do
-    	{
-    		if(vc->value == value)
-    			return vc->key;
-    		vc = vc->next;
-    	} while(vc);
+        struct bsthv_value_chain_t* vc = &kv->value_chain;
+        do
+        {
+            if(vc->value == value)
+                return vc->key;
+            vc = vc->next;
+        } while(vc);
     ORDERED_VECTOR_END_EACH
 
     return NULL;
@@ -293,7 +286,7 @@ bsthv_get_any_element(const struct bsthv_t* bsthv)
     assert(bsthv);
     kv = (struct bsthv_key_value_t*)ordered_vector_back(&bsthv->vector);
     if(kv)
-    	return kv->value_chain.value;
+        return kv->value_chain.value;
     return NULL;
 }
 
@@ -315,7 +308,7 @@ bsthv_key_exists(struct bsthv_t* bsthv, const char* key)
     hash = bsthv_hash_string(key);
     data = bsthv_find_lower_bound(bsthv, hash);
     if(!data || data->hash != hash)
-    	return 0;
+        return 0;
 
     /*
      * Iterate over chain and find the key we're looking for.
@@ -323,9 +316,9 @@ bsthv_key_exists(struct bsthv_t* bsthv, const char* key)
     vc = &data->value_chain;
     do
     {
-    	if(strcmp(key, vc->key) == 0)
-    		return 1;
-    	vc = vc->next;
+        if(strcmp(key, vc->key) == 0)
+            return 1;
+        vc = vc->next;
     } while(vc);
 
     return 0;
@@ -349,7 +342,7 @@ bsthv_erase(struct bsthv_t* bsthv, const char* key)
     hash = bsthv_hash_string(key);
     kv = bsthv_find_lower_bound(bsthv, hash);
     if(!kv || kv->hash != hash)
-    	return NULL;
+        return NULL;
 
     /* kv object exists and is valid. Remove it */
     return bsthv_erase_key_value_object(bsthv, key, kv);
@@ -358,19 +351,18 @@ bsthv_erase(struct bsthv_t* bsthv, const char* key)
 /* ------------------------------------------------------------------------- */
 void*
 bsthv_erase_key_value_object(struct bsthv_t* bsthv,
-    						 const char* key,
-    						 struct bsthv_key_value_t* kv)
+                             const char* key,
+                             struct bsthv_key_value_t* kv)
 {
     struct bsthv_value_chain_t* vc;
     struct bsthv_value_chain_t* parent_vc;
 
     if(!kv->value_chain.next)
     {
-    	void* value = kv->value_chain.value;
-    	free_string(kv->value_chain.key);
-    	ordered_vector_erase_element(&bsthv->vector, kv);
-    	--bsthv->count;
-    	return value;
+        void* value = kv->value_chain.value;
+        free_string(kv->value_chain.key);
+        ordered_vector_erase_element(&bsthv->vector, kv);
+        return value;
     }
 
     /*
@@ -382,16 +374,15 @@ bsthv_erase_key_value_object(struct bsthv_t* bsthv,
     vc = &kv->value_chain;
     if(strcmp(key, kv->value_chain.key) == 0)
     {
-    	struct bsthv_value_chain_t* replacement = vc->next;
-    	void* ret_value = vc->value;
-    	/* we have everything we need, free current and move replacement into its place */
-    	free_string(vc->key);
-    	memcpy(vc, replacement, sizeof *vc); /* copies the next value into the bsthv's internal vector */
-    	FREE(replacement);
+        struct bsthv_value_chain_t* replacement = vc->next;
+        void* ret_value = vc->value;
+        /* we have everything we need, free current and move replacement into its place */
+        free_string(vc->key);
+        memcpy(vc, replacement, sizeof *vc); /* copies the next value into the bsthv's internal vector */
+        FREE(replacement);
 
-    	/* done */
-    	--bsthv->count;
-    	return ret_value;
+        /* done */
+        return ret_value;
     }
 
     /*
@@ -402,17 +393,16 @@ bsthv_erase_key_value_object(struct bsthv_t* bsthv,
     vc = vc->next;  /* next will always exist, or we wouldn't be here */
     do
     {
-    	if(strcmp(key, vc->key) == 0)
-    	{
-    		void* value = vc->value;
-    		free_string(vc->key);
-    		parent_vc->next = vc->next; /* unlink this value by linking next with parent */
-    		FREE(vc);
-    		--bsthv->count;
-    		return value;
-    	}
-    	parent_vc = vc;
-    	vc = vc->next;
+        if(strcmp(key, vc->key) == 0)
+        {
+            void* value = vc->value;
+            free_string(vc->key);
+            parent_vc->next = vc->next; /* unlink this value by linking next with parent */
+            FREE(vc);
+            return value;
+        }
+        parent_vc = vc;
+        vc = vc->next;
     } while(vc);
 
     return NULL;
@@ -427,7 +417,7 @@ bsthv_erase_element(struct bsthv_t* bsthv, void* value)
     assert(bsthv);
 
     if(!(key = bsthv_find_element(bsthv, value)))
-    	return NULL;
+        return NULL;
 
     bsthv_erase(bsthv, key);
 
@@ -440,17 +430,17 @@ bsthv_free_all_chains_and_keys(struct bsthv_t* bsthv)
 {
     assert(bsthv);
     ORDERED_VECTOR_FOR_EACH(&bsthv->vector, struct bsthv_key_value_t, kv)
-    	struct bsthv_value_chain_t* vc = kv->value_chain.next;
+        struct bsthv_value_chain_t* vc = kv->value_chain.next;
 
-    	free_string(kv->value_chain.key);
+        free_string(kv->value_chain.key);
 
-    	while(vc)
-    	{
-    		struct bsthv_value_chain_t* to_free = vc;
-    		vc = vc->next;
-    		free_string(to_free->key);
-    		FREE(to_free);
-    	}
+        while(vc)
+        {
+            struct bsthv_value_chain_t* to_free = vc;
+            vc = vc->next;
+            free_string(to_free->key);
+            FREE(to_free);
+        }
     ORDERED_VECTOR_END_EACH
 }
 

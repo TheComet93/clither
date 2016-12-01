@@ -5,20 +5,13 @@
 #include "util/config.h"
 
 C_HEADER_BEGIN
-
 #ifdef ENABLE_MEMORY_DEBUGGING
-#   define MALLOC malloc_wrapper
-#   define FREE free_wrapper
+#   define MALLOC(size, where) malloc_wrapper_debug(size, "malloc() failed in " where " - not enough memory")
+#   define FREE free_wrapper_debug
 #else
-#   include <stdlib.h>
-#   define MALLOC malloc
-#   define FREE free
+#   define MALLOC(size, where) malloc_wrapper(size, "malloc() failed in " where " - not enough memory")
+#   define FREE free free
 #endif
-
-#define OUT_OF_MEMORY(where, goto_label) do { \
-        log_critical_use_no_memory("malloc() failed in " where " - not enough memory"); \
-        goto goto_label; \
-    } while(0)
 
 /*!
  * @brief Initialises the memory system.
@@ -45,14 +38,17 @@ memory_deinit(void);
  * additional work monitor and track down memory leaks.
  */
 UTIL_PUBLIC_API void*
-malloc_wrapper(intptr_t size);
+malloc_wrapper_debug(uintptr_t size, const char* msg);
+
+UTIL_PUBLIC_API void*
+malloc_wrapper(uintptr_t size, const char* msg);
 
 /*!
  * @brief Does the same thing as a normal call to fee(), but does some
  * additional work monitor and track down memory leaks.
  */
 UTIL_PUBLIC_API void
-free_wrapper(void* ptr);
+free_wrapper_debug(void* ptr);
 
 #   ifdef ENABLE_MEMORY_EXPLICIT_MALLOC_FAILURES
 /*!

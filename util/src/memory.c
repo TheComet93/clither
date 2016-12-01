@@ -27,22 +27,22 @@ static volatile int malloc_fail_counter = 0;
 #           define MUTEX_LOCK(x) pthread_mutex_lock(&(x));
 #           define MUTEX_UNLOCK(x) pthread_mutex_unlock(&(x));
 #           define MUTEX_INIT(x) do {                                           \
-    			pthread_mutexattr_t attr;                                       \
-    			pthread_mutexattr_init(&attr);                                  \
-    			pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);      \
-    			pthread_mutex_init(&(x), &attr);                                \
-    			pthread_mutexattr_destroy(&attr);                               \
-    		} while(0);
+                pthread_mutexattr_t attr;                                       \
+                pthread_mutexattr_init(&attr);                                  \
+                pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);      \
+                pthread_mutex_init(&(x), &attr);                                \
+                pthread_mutexattr_destroy(&attr);                               \
+            } while(0);
 #           define MUTEX_DEINIT(x) pthread_mutex_destroy(&(x));
 
 #       else /* defined(UTIL_PLATFORM_LINUX) || defined(LIGHTSHIP_UTIL_PLATFORM_MACOSX) */
-#    		include <Windows.h>
-#    		include <process.h>
+#            include <Windows.h>
+#            include <process.h>
 #           define MUTEX HANDLE
-#    		define MUTEX_LOCK(x) WaitForSingleObject(x, INFINITE);
-#    		define MUTEX_UNLOCK(x) ReleaseMutex(x);
-#    		define MUTEX_INIT(x) do { x = CreateMutex(NULL, FALSE, NULL); } while(0);
-#    		define MUTEX_DEINIT(x) CloseHandle(x);
+#            define MUTEX_LOCK(x) WaitForSingleObject(x, INFINITE);
+#            define MUTEX_UNLOCK(x) ReleaseMutex(x);
+#            define MUTEX_INIT(x) do { x = CreateMutex(NULL, FALSE, NULL); } while(0);
+#            define MUTEX_DEINIT(x) CloseHandle(x);
 #       endif /* defined(UTIL_PLATFORM_LINUX) || defined(LIGHTSHIP_UTIL_PLATFORM_MACOSX) */
 
     static MUTEX mutex;
@@ -78,8 +78,8 @@ memory_init(void)
      * would be wrong in the case of MALLOC() never being called.
      */
     ignore_bstv_malloc = 1;
-    	bstv_init(&report);
-    	bstv_insert(&report, 0, NULL); bstv_erase(&report, 0);
+        bstv_init(&report);
+        bstv_insert(&report, 0, NULL); bstv_erase(&report, 0);
     ignore_bstv_malloc = 0;
 
     MUTEX_INIT(mutex)
@@ -91,7 +91,7 @@ memory_init(void)
 
 /* ------------------------------------------------------------------------- */
 void*
-malloc_wrapper(intptr_t size)
+malloc_wrapper_debug(uintptr_t size, const char* msg)
 {
     void* p = NULL;
     struct report_info_t* info = NULL;
@@ -103,101 +103,101 @@ malloc_wrapper(intptr_t size)
     {
 
 #   ifdef ENABLE_MEMORY_EXPLICIT_MALLOC_FAILURES
-    	if(malloc_fail_counter && !ignore_bstv_malloc)
-    	{
-    		/* fail when counter reaches 1 */
-    		if(malloc_fail_counter == 1)
-    			break;
-    		else
-    			--malloc_fail_counter;
-    	}
+        if(malloc_fail_counter && !ignore_bstv_malloc)
+        {
+            /* fail when counter reaches 1 */
+            if(malloc_fail_counter == 1)
+                break;
+            else
+                --malloc_fail_counter;
+        }
 #   endif
 
-    	/* allocate */
-    	p = malloc(size);
-    	if(p)
-    		++allocations;
-    	else
-    		break;
+        /* allocate */
+        p = malloc_wrapper(size, msg);
+        if(p)
+            ++allocations;
+        else
+            break;
 
-    	/*
-    	* Record allocation info. Call to bstv may allocate memory,
-    	* so set flag to ignore the call to malloc() when inserting.
-    	*/
-    	if(!ignore_bstv_malloc)
-    	{
-    		ignore_bstv_malloc = 1;
-    		info = (struct report_info_t*)malloc(sizeof(struct report_info_t));
-    		if(!info)
-    		{
-    			fprintf(stderr, "[memory] ERROR: malloc() for report_info_t failed"
-    				" -- not enough memory.\n");
-    			ignore_bstv_malloc = 0;
-    			break;
-    		}
+        /*
+        * Record allocation info. Call to bstv may allocate memory,
+        * so set flag to ignore the call to malloc() when inserting.
+        */
+        if(!ignore_bstv_malloc)
+        {
+            ignore_bstv_malloc = 1;
+            info = (struct report_info_t*)malloc_wrapper(sizeof(struct report_info_t), msg);
+            if(!info)
+            {
+                fprintf(stderr, "[memory] ERROR: malloc() for report_info_t failed"
+                    " -- not enough memory.\n");
+                ignore_bstv_malloc = 0;
+                break;
+            }
 
-    		/* record the location and size of the allocation */
-    		info->location = (uintptr_t)p;
-    		info->size = size;
+            /* record the location and size of the allocation */
+            info->location = (uintptr_t)p;
+            info->size = size;
 
-    		/* if enabled, generate a backtrace so we know where memory leaks
-    		* occurred */
+            /* if enabled, generate a backtrace so we know where memory leaks
+            * occurred */
 #   ifdef ENABLE_MEMORY_BACKTRACE
-    		if(!(info->backtrace = get_backtrace(&info->backtrace_size)))
-    			fprintf(stderr, "[memory] WARNING: Failed to generate backtrace\n");
+            if(!(info->backtrace = get_backtrace(&info->backtrace_size)))
+                fprintf(stderr, "[memory] WARNING: Failed to generate backtrace\n");
 #   endif
 
-    		/* insert into bstv */
-    		if(!bstv_insert(&report, (uintptr_t)p, info))
-    		{
-    			fprintf(stderr,
-    			"[memory] WARNING: Hash collision occurred when inserting\n"
-    			"into memory report bstv. On 64-bit systems the pointers are\n"
-    			"rounded down to 32-bit unsigned integers, so even though\n"
-    			"it's rare, collisions can happen.\n\n"
-    			"The matching call to FREE() will generate a warning saying\n"
-    			"something is being freed that was never allocated. This is to\n"
-    			"be expected and can be ignored.\n");
+            /* insert into bstv */
+            if(!bstv_insert(&report, (uintptr_t)p, info))
+            {
+                fprintf(stderr,
+                "[memory] WARNING: Hash collision occurred when inserting\n"
+                "into memory report bstv. On 64-bit systems the pointers are\n"
+                "rounded down to 32-bit unsigned integers, so even though\n"
+                "it's rare, collisions can happen.\n\n"
+                "The matching call to FREE() will generate a warning saying\n"
+                "something is being freed that was never allocated. This is to\n"
+                "be expected and can be ignored.\n");
 #   ifdef ENABLE_MEMORY_BACKTRACE
-    			{
-    				char** bt;
-    				int bt_size, i;
-    				if((bt = get_backtrace(&bt_size)))
-    				{
-    					printf("  backtrace to where malloc() was called:\n");
-    					for(i = 0; i < bt_size; ++i)
-    						printf("      %s\n", bt[i]);
-    					printf("  -----------------------------------------\n");
-    					free(bt);
-    				}
-    				else
-    					fprintf(stderr, "[memory] WARNING: Failed to generate backtrace\n");
-    			}
+                {
+                    char** bt;
+                    int bt_size, i;
+                    if((bt = get_backtrace(&bt_size)))
+                    {
+                        printf("  backtrace to where malloc() was called:\n");
+                        for(i = 0; i < bt_size; ++i)
+                            printf("      %s\n", bt[i]);
+                        printf("  -----------------------------------------\n");
+                        free(bt);
+                    }
+                    else
+                        fprintf(stderr, "[memory] WARNING: Failed to generate backtrace\n");
+                }
 #   endif
-    		}
-    		ignore_bstv_malloc = 0;
-    	}
+            }
+            ignore_bstv_malloc = 0;
+        }
 
-    	/* success */
-    	MUTEX_UNLOCK(mutex)
+        /* success */
+        MUTEX_UNLOCK(mutex)
 
-    	return p;
+        return p;
     }
 
     /* failure */
     if(p)
     {
-    	free(p);
-    	--allocations;
+        free(p);
+        --allocations;
     }
 
     if(info)
     {
 #   ifdef ENABLE_MEMORY_BACKTRACE
-    	if(info->backtrace)
-    		free(info->backtrace);
+        if(info->backtrace)
+            free(info->backtrace);
 #   endif
-    	free(info);
+        free(info);
     }
 
     MUTEX_UNLOCK(mutex)
@@ -206,56 +206,66 @@ malloc_wrapper(intptr_t size)
 }
 
 /* ------------------------------------------------------------------------- */
+void*
+malloc_wrapper(uintptr_t size, const char* msg)
+{
+    void* mem = malloc(size);
+    if(mem == NULL)
+        fprintf(stderr, "%s", msg);
+    return mem;
+}
+
+/* ------------------------------------------------------------------------- */
 void
-free_wrapper(void* ptr)
+free_wrapper_debug(void* ptr)
 {
     MUTEX_LOCK(mutex)
 
     /* find matching allocation and remove from bstv */
     if(!ignore_bstv_malloc)
     {
-    	struct report_info_t* info = (struct report_info_t*)bstv_erase(&report, (uintptr_t)ptr);
-    	if(info)
-    	{
+        struct report_info_t* info = (struct report_info_t*)bstv_erase(&report, (uintptr_t)ptr);
+        if(info)
+        {
 #   ifdef ENABLE_MEMORY_BACKTRACE
-    		if(info->backtrace)
-    			free(info->backtrace);
-    		else
-    			fprintf(stderr, "[memory] WARNING: free(): Allocation didn't "
-    				"have a backtrace (it was NULL)\n");
+            if(info->backtrace)
+                free(info->backtrace);
+            else
+                fprintf(stderr, "[memory] WARNING: free(): Allocation didn't "
+                    "have a backtrace (it was NULL)\n");
 #   endif
-    		free(info);
-    	}
-    	else
-    	{
+            free(info);
+        }
+        else
+        {
 #   ifdef ENABLE_MEMORY_BACKTRACE
-    		char** bt;
-    		int bt_size, i;
-    		fprintf(stderr, "  -----------------------------------------\n");
+            char** bt;
+            int bt_size, i;
+            fprintf(stderr, "  -----------------------------------------\n");
 #   endif
-    		fprintf(stderr, "  WARNING: Freeing something that was never allocated\n");
+            fprintf(stderr, "  WARNING: Freeing something that was never allocated\n");
 #   ifdef ENABLE_MEMORY_BACKTRACE
-    		if((bt = get_backtrace(&bt_size)))
-    		{
-    			fprintf(stderr, "  backtrace to where free() was called:\n");
-    			for(i = 0; i < bt_size; ++i)
-    				fprintf(stderr, "      %s\n", bt[i]);
-    			fprintf(stderr, "  -----------------------------------------\n");
-    			free(bt);
-    		}
-    		else
-    			fprintf(stderr, "[memory] WARNING: Failed to generate backtrace\n");
+            if((bt = get_backtrace(&bt_size)))
+            {
+                fprintf(stderr, "  backtrace to where free() was called:\n");
+                for(i = 0; i < bt_size; ++i)
+                    fprintf(stderr, "      %s\n", bt[i]);
+                fprintf(stderr, "  -----------------------------------------\n");
+                free(bt);
+            }
+            else
+                fprintf(stderr, "[memory] WARNING: Failed to generate backtrace\n");
 #   endif
-    	}
+        }
     }
 
     if(ptr)
     {
-    	++deallocations;
-    	free(ptr);
+        ++deallocations;
+        free(ptr);
     }
     else
-    	fprintf(stderr, "Warning: free(NULL)\n");
+        fprintf(stderr, "Warning: free(NULL)\n");
 
     MUTEX_UNLOCK(mutex)
 }
@@ -275,26 +285,26 @@ memory_deinit(void)
     /* report details on any allocations that were not de-allocated */
     if(report.vector.count != 0)
     {
-    	BSTV_FOR_EACH(&report, struct report_info_t, key, info)
+        BSTV_FOR_EACH(&report, struct report_info_t, key, info)
 
-    		printf("  un-freed memory at %p, size %p\n", (void*)info->location, (void*)info->size);
-    		mutated_string_and_hex_dump((void*)info->location, info->size);
+            printf("  un-freed memory at %p, size %p\n", (void*)info->location, (void*)info->size);
+            mutated_string_and_hex_dump((void*)info->location, info->size);
 
 #   ifdef ENABLE_MEMORY_BACKTRACE
-    		printf("  Backtrace to where malloc() was called:\n");
-    		{
-    			intptr_t i;
-    			for(i = BACKTRACE_OMIT_COUNT; i < info->backtrace_size; ++i)
-    				printf("      %s\n", info->backtrace[i]);
-    		}
-    		free(info->backtrace); /* this was allocated when malloc() was called */
-    		printf("  -----------------------------------------\n");
+            printf("  Backtrace to where malloc() was called:\n");
+            {
+                intptr_t i;
+                for(i = BACKTRACE_OMIT_COUNT; i < info->backtrace_size; ++i)
+                    printf("      %s\n", info->backtrace[i]);
+            }
+            free(info->backtrace); /* this was allocated when malloc() was called */
+            printf("  -----------------------------------------\n");
 #   endif
-    		free(info);
+            free(info);
 
-    	BSTV_END_EACH
+        BSTV_END_EACH
 
-    	printf("=========================================\n");
+        printf("=========================================\n");
     }
 
     /* overall report */
@@ -359,24 +369,24 @@ mutated_string_and_hex_dump(void* data, intptr_t length_in_bytes)
     intptr_t i;
 
     /* allocate and copy data into new buffer */
-    if(!(dump = malloc(length_in_bytes + 1)))
+    if(!(dump = malloc_wrapper(length_in_bytes + 1, "")))
     {
-    	fprintf(stderr, "[memory] WARNING: Failed to malloc() space for dump\n");
-    	return;
+        fprintf(stderr, "[memory] WARNING: Failed to malloc() space for dump\n");
+        return;
     }
     memcpy(dump, data, length_in_bytes);
     dump[length_in_bytes] = '\0';
 
     /* mutate null terminators into dots */
     for(i = 0; i != length_in_bytes; ++i)
-    	if(dump[i] == '\0')
-    		dump[i] = '.';
+        if(dump[i] == '\0')
+            dump[i] = '.';
 
     /* dump */
     printf("  mutated string dump: %s\n", dump);
     printf("  hex dump: ");
     for(i = 0; i != length_in_bytes; ++i)
-    	printf(" %02x", (unsigned char)dump[i]);
+        printf(" %02x", (unsigned char)dump[i]);
     printf("\n");
 
     free(dump);

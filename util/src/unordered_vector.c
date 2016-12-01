@@ -20,7 +20,7 @@
  */
 static void*
 unordered_vector_expand(struct unordered_vector_t* vector,
-    					uint32_t insertion_index);
+                        uint32_t insertion_index);
 
 /* ----------------------------------------------------------------------------
  * Exported functions
@@ -29,8 +29,8 @@ struct unordered_vector_t*
 unordered_vector_create(const uint32_t element_size)
 {
     struct unordered_vector_t* vector;
-    if(!(vector = (struct unordered_vector_t*)MALLOC(sizeof(struct unordered_vector_t))))
-    	return NULL;
+    if(!(vector = (struct unordered_vector_t*)MALLOC(sizeof(struct unordered_vector_t), "unordered_vector_create()")))
+        return NULL;
     unordered_vector_init(vector, element_size);
     return vector;
 }
@@ -75,7 +75,7 @@ unordered_vector_clear_free(struct unordered_vector_t* vector)
     assert(vector);
 
     if(vector->data)
-    	FREE(vector->data);
+        FREE(vector->data);
     vector->data = NULL;
     vector->count = 0;
     vector->capacity = 0;
@@ -92,15 +92,15 @@ unordered_vector_push_emplace(struct unordered_vector_t* vector)
 
     if(vector->count == vector->capacity)
     {
-    	data = unordered_vector_expand(vector, -1);
-    	if(!data)
-    	{
-    		fprintf(stderr, "malloc() failed in unordered_vector_push_emplace() -- out of memory\n");
-    		return NULL;
-    	}
+        data = unordered_vector_expand(vector, -1);
+        if(!data)
+        {
+            fprintf(stderr, "malloc() failed in unordered_vector_push_emplace() -- out of memory\n");
+            return NULL;
+        }
     }
     else
-    	data = vector->data;
+        data = vector->data;
 
     data = (void*)((intptr_t)data + (vector->element_size * vector->count));
     ++vector->count;
@@ -118,7 +118,7 @@ unordered_vector_push(struct unordered_vector_t* vector, void* data)
 
     target = unordered_vector_push_emplace(vector);
     if(!target)
-    	return 0;
+        return 0;
 
     memcpy(target, data, vector->element_size);
     return 1;
@@ -131,7 +131,7 @@ unordered_vector_pop(struct unordered_vector_t* vector)
     assert(vector);
 
     if(!vector->count)
-    	return NULL;
+        return NULL;
 
     --vector->count;
     return (void*)((intptr_t)vector->data + (vector->element_size * vector->count));
@@ -144,7 +144,7 @@ unordered_vector_back(struct unordered_vector_t* vector)
     assert(vector);
 
     if(!vector->count)
-    	return NULL;
+        return NULL;
 
     return vector->data + (vector->element_size * (vector->count - 1));
 }
@@ -157,15 +157,15 @@ unordered_vector_erase_index(struct unordered_vector_t* vector, uint32_t index)
     assert(vector->element_size);
 
     if(index >= vector->count)
-    	return;
+        return;
 
     /* no need to copy memory if erasing the last index */
     if(index + 1 < vector->count)
     {
-    	/* copy last element to fill the gap */
-    	memcpy(vector->data + vector->element_size * index,    /* target is to overwrite the element specified by index */
-    		   (void*)((intptr_t)vector->data + (vector->count-1) * vector->element_size), /* last element */
-    		   vector->element_size);
+        /* copy last element to fill the gap */
+        memcpy(vector->data + vector->element_size * index,    /* target is to overwrite the element specified by index */
+               (void*)((intptr_t)vector->data + (vector->count-1) * vector->element_size), /* last element */
+               vector->element_size);
     }
 
     --vector->count;
@@ -187,9 +187,9 @@ unordered_vector_erase_element(struct unordered_vector_t* vector, void* element)
     last_element = (void*)(vector->data + vector->count * vector->element_size);
     if(element != last_element)
     {
-    	memcpy(element,    /* target is to overwrite the element */
-    		   last_element,
-    		   vector->element_size);
+        memcpy(element,    /* target is to overwrite the element */
+               last_element,
+               vector->element_size);
     }
 }
 
@@ -200,7 +200,7 @@ unordered_vector_get_element(struct unordered_vector_t* vector, uint32_t index)
     assert(vector);
 
     if(index >= vector->count)
-    	return NULL;
+        return NULL;
     return vector->data + index * vector->element_size;
 }
 
@@ -209,7 +209,7 @@ unordered_vector_get_element(struct unordered_vector_t* vector, uint32_t index)
  * ------------------------------------------------------------------------- */
 static void*
 unordered_vector_expand(struct unordered_vector_t* vector,
-    					uint32_t insertion_index)
+                        uint32_t insertion_index)
 {
     uint32_t new_size;
     DATA_POINTER_TYPE* old_data;
@@ -224,35 +224,35 @@ unordered_vector_expand(struct unordered_vector_t* vector,
      */
     if(new_size == 0)
     {
-    	new_size = 2;
-    	vector->data = MALLOC(vector->element_size * new_size);
-    	if(!vector->data)
-    		return NULL;
-    	vector->capacity = new_size;
-    	return vector->data;
+        new_size = 2;
+        vector->data = MALLOC(vector->element_size * new_size, "unordered_vector_expand()");
+        if(!vector->data)
+            return NULL;
+        vector->capacity = new_size;
+        return vector->data;
     }
 
     /* prepare for reallocating data */
     old_data = vector->data;
-    new_data = (DATA_POINTER_TYPE*)MALLOC(vector->element_size * new_size);
+    new_data = (DATA_POINTER_TYPE*)MALLOC(vector->element_size * new_size, "unordered_vector_expand()");
     if(!new_data)
-    	return NULL;
+        return NULL;
 
     /* if no insertion index is required, copy all data to new memory */
     if(insertion_index == (uint32_t)-1 || insertion_index >= new_size)
-    	memcpy(new_data, old_data, vector->element_size * vector->count);
+        memcpy(new_data, old_data, vector->element_size * vector->count);
 
     /* keep space for one element at the insertion index */
     else
     {
-    	/* copy old data up until right before insertion offset */
-    	uint32_t offset = vector->element_size * insertion_index;
-    	uint32_t total_size = vector->element_size * vector->count;
-    	memcpy(new_data, old_data, offset);
-    	/* copy the remaining amount of old data shifted one element ahead */
-    	memcpy((void*)((intptr_t)new_data + offset + vector->element_size),
-    		   (void*)((intptr_t)old_data + offset),
-    		   total_size - offset);
+        /* copy old data up until right before insertion offset */
+        uint32_t offset = vector->element_size * insertion_index;
+        uint32_t total_size = vector->element_size * vector->count;
+        memcpy(new_data, old_data, offset);
+        /* copy the remaining amount of old data shifted one element ahead */
+        memcpy((void*)((intptr_t)new_data + offset + vector->element_size),
+               (void*)((intptr_t)old_data + offset),
+               total_size - offset);
     }
     vector->capacity = new_size;
     vector->data = new_data;

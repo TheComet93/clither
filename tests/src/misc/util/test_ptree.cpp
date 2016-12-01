@@ -80,7 +80,7 @@ TEST(NAME, destroy_and_keep_root)
     // but the memory reporter will show objects that were double-freed or not
     // deallocated at all.
 
-    struct ptree_t* tree = (struct ptree_t*)MALLOC(sizeof *tree);
+    struct ptree_t* tree = (struct ptree_t*)MALLOC(sizeof *tree, "");
     ptree_init(tree, NULL);
     ptree_destroy_keep_root(tree);
     FREE(tree);

@@ -1,97 +1,96 @@
 #include "game/config.h"
+#include "util/bst_hashed_vector.h"
 #include "util/unordered_vector.h"
 
 C_HEADER_BEGIN
 
 struct event_t;
-struct event_data_t;
 struct game_t;
 
-typedef void (*event_callback_func)(struct event_t*, struct event_data_t*);
+typedef void (*event_callback_func)(struct event_t*, void*);
 
 struct event_t
 {
-    char* directory;
+    char* name;
     struct game_t* game;
     struct unordered_vector_t listeners;   /* holds event_listener_t objects */
 };
 
-struct event_listener_t
+struct event_system_t
 {
-    event_callback_func callback;
+    struct game_t* game;
+    struct bsthv_t events;
 };
 
 /*!
- * @brief Initialises the event system.
- * @note Must be called before calling any other event related functions.
+ * @brief Creates a new event system for the specified game instance.
+ * This must be called before any events can be fired.
+ * @return Returns 1 if successful, 0 if otherwise.
  */
 GAME_PUBLIC_API char
-event_system_init(struct game_t* game);
-
-GAME_PUBLIC_API void
-event_system_deinit(struct game_t* game);
+event_system_create(struct game_t* game);
 
 /*!
- * @brief Creates and registers a new event in the host program.
+ * @brief Destroys an event system. This will unregister all listeners and
+ * destroy all registered events.
+ */
+GAME_PUBLIC_API void
+event_system_destroy(struct game_t* game);
+
+/*!
+ * @brief Creates and registers a new event.
  *
- * @param[in] game The game object this event should be created in.
- * @param[in] directory The name of the event. Should be unique per game
- * instance.
+ * Before events can be fired, they first need to be registered to the game
+ * instance  using a unique name. An event object is returned, which can be
+ * used to fire events. Or you can just ignore the returned object and
+ * retrieve it later with event_get().
+ *
+ * @param[in] game The game this event should be created in.
+ * @param[in] name A unique name of the event. Can be used by other parts of
+ * the program to retrieve an event object with event_get().
  * @note The name string is copied to an internal buffer, so you are free to
  * delete it when it is no longer used.
  * @return Returns a new event object which should be later deleted with
- * event_destroy().
+ * event_unregister() when no longer required.
  */
 GAME_PUBLIC_API struct event_t*
-event_create(struct game_t* game,
-             const char* directory);
-
+event_register(struct game_t* game, const char* name);
 
 /*!
- * @brief Destroys an event object.
+ * @brief Unregisters and destroys an event object.
  * @note This also destroys all registered event listeners and removes it from
  * the assigned game object.
+ * @warning Make sure other parts of the program are NOT holding pointers to a
+ * destroyed event object.
  * @param[in] event The event object to destroy.
- * @return Returns 1 if successful, 0 if otherwise.
  */
 GAME_PUBLIC_API void
-event_destroy(struct event_t* event);
+event_unregister(struct event_t* event);
 
 /*!
- * @brief Destroys all events that were registered by the specified plugin.
- * @note This also destroys all registered event listeners.
- * @param[in] plugin The plugin to destroy the events from.
- */
-/* TODO implement */
-GAME_PUBLIC_API void
-event_destroy_all_matching(const char* pattern);
-
-/*!
- * @brief Returns an event object with the specified name.
+ * @brief Returns an event object matching the specified name.
  * @return If the event object does not exist, NULL is returned, otherwise the
  * event object is returned.
  */
 GAME_PUBLIC_API struct event_t*
-event_get(const struct game_t* game, const char* directory);
+event_get(const struct game_t* game, const char* name);
 
 /*!
  * @brief Registers a listener to the specified event.
  * @note The same callback function will not be registered twice.
- * @param[in] game The game hosting the event you want to listen to.
- * @param[in] event_name The name of the event to register to.
+ * @param[in] event_system The game hosting the event you want to listen to.
+ * @param[in] event The event object to register to.
  * @param[in] callback The callback function to call when the event is fired.
  */
 GAME_PUBLIC_API char
-event_register_listener(const struct game_t* game,
-                        const char* event_directory,
+event_register_listener(struct event_t* event,
                         event_callback_func callback);
 
 /*!
  * @brief Unregisters a listener from the specified event.
  */
 GAME_PUBLIC_API char
-event_unregister_listener(const struct game_t* game,
-                          const char* event_directory,
+event_unregister_listener(struct event_t* event,
                           event_callback_func callback);
 
 /*!
@@ -99,6 +98,5 @@ event_unregister_listener(const struct game_t* game,
  */
 GAME_PUBLIC_API void
 event_unregister_all_listeners(struct event_t* event);
-
 
 C_HEADER_END

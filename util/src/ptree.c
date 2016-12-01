@@ -28,7 +28,7 @@ struct ptree_t*
 ptree_create(void* value)
 {
     struct ptree_t* tree;
-    if(!(tree = (struct ptree_t*)MALLOC(sizeof(struct ptree_t))))
+    if(!(tree = (struct ptree_t*)MALLOC(sizeof(struct ptree_t), "ptree_create()")))
     	return NULL;
     ptree_init(tree, value);
     return tree;
@@ -129,7 +129,7 @@ static struct ptree_t*
 ptree_add_node(struct ptree_t* tree, const char* key, void* value)
 {
     struct ptree_t* child;
-    if(!(child = (struct ptree_t*)MALLOC(sizeof(struct ptree_t))))
+    if(!(child = (struct ptree_t*)MALLOC(sizeof(struct ptree_t), "ptree_add_node()")))
     	return NULL;
 
     if(!bsthv_insert(&tree->children, key, child))

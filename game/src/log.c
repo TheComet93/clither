@@ -14,7 +14,7 @@
 char
 log_global_open(void)
 {
-
+    return 0;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -66,31 +66,31 @@ log_message(log_level_e level,
     /* determine tag string */
     switch(level)
     {
-    	case LOG_INFO:
-    		tag = "[INFO] ";
-    		break;
-    	case LOG_WARNING:
-    		tag = "[WARNING] ";
-    		break;
-    	case LOG_ERROR:
-    		tag = "[ERROR] ";
-    		break;
-    	case LOG_FATAL:
-    		tag = "[FATAL] ";
-    		break;
-    	case LOG_USER:
-    		tag = "[USER] ";
-    		break;
-    	default:
-    		tag = "";
-    		break;
+        case LOG_INFO:
+            tag = "[INFO] ";
+            break;
+        case LOG_WARNING:
+            tag = "[WARNING] ";
+            break;
+        case LOG_ERROR:
+            tag = "[ERROR] ";
+            break;
+        case LOG_FATAL:
+            tag = "[FATAL] ";
+            break;
+        case LOG_USER:
+            tag = "[USER] ";
+            break;
+        default:
+            tag = "";
+            break;
     }
     total_length += strlen(tag);
 
     /* add length of game string, plus three characters for [] and space */
     if(game)
     {
-    	total_length += strlen(game->name) + 3;
+        total_length += strlen(game->name) + 3;
     }
 
     /*
@@ -105,7 +105,7 @@ log_message(log_level_e level,
     total_length += 2;
 
     /* allocate buffer and copy all strings into it */
-    buffer = (char*)MALLOC(sizeof(char) * total_length);
+    buffer = (char*)MALLOC(sizeof(char) * total_length, "log_message()");
     *buffer = '\0'; /* so strcat() works */
 
     /* copy timestamp into buffer */
@@ -119,17 +119,17 @@ log_message(log_level_e level,
     /* copy game name */
     if(game)
     {
-    	strcat(buffer, "[");
-    	strcat(buffer, game->name);
-    	strcat(buffer, "] ");
+        strcat(buffer, "[");
+        strcat(buffer, game->name);
+        strcat(buffer, "] ");
     }
 
     /* copy varargs into buffer and end with newline */
     {
-    	int off = strlen(buffer);
-    	va_start(ap, fmt);
-    	vsnprintf(buffer + off, total_length - off, fmt, ap);
-    	va_end(ap);
+        int off = strlen(buffer);
+        va_start(ap, fmt);
+        vsnprintf(buffer + off, total_length - off, fmt, ap);
+        va_end(ap);
     }
 
     /* null terminator and newline */

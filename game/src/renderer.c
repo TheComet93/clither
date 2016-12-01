@@ -37,7 +37,7 @@ static void*
 allocationFunction(void* pUserData, size_t  size,  size_t  alignment, VkSystemAllocationScope allocationScope)
 {
     /* Ignore alignment, for while */
-    return MALLOC(size); /*_aligned_malloc(size, alignment); */
+    return MALLOC(size, "allocationFunction() (vulkan malloc wrapper)"); /*_aligned_malloc(size, alignment); */
 }
 
 /*
@@ -63,7 +63,7 @@ struct renderer_t*
 renderer_create(void)
 {
     struct renderer_t* renderer;
-    if(!(renderer = (struct renderer_t*)MALLOC(sizeof *renderer)))
+    if(!(renderer = (struct renderer_t*)MALLOC(sizeof *renderer, "renderer_create()")))
         return NULL;
     renderer_init(renderer);
     return renderer;

@@ -10,7 +10,7 @@ struct list_t*
 list_create(void)
 {
     struct list_t* list;
-    if(!(list = (struct list_t*)MALLOC(sizeof(struct list_t))))
+    if(!(list = (struct list_t*)MALLOC(sizeof(struct list_t), "list_create()")))
     	return NULL;
     list_init(list);
     return list;
@@ -58,7 +58,7 @@ list_push(struct list_t* list, void* data)
 
     assert(list);
 
-    node = (struct list_node_t*)MALLOC(sizeof(struct list_node_t));
+    node = (struct list_node_t*)MALLOC(sizeof(struct list_node_t), "list_push()");
     if(!node)
     {
     	fprintf(stderr, "malloc() failed in list_push() -- not enough memory\n");
