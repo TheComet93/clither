@@ -76,12 +76,10 @@ if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
     if (ENABLE_PROFILING)
         add_definitions(-pg)
     endif ()
-    add_definitions (-Werror)
 elseif (${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
     if (ENABLE_PROFILING)
         add_definitions(-pg)
     endif ()
-    add_definitions (-Werror)
 elseif (${CMAKE_C_COMPILER_ID} STREQUAL "Intel")
 elseif (${CMAKE_C_COMPILER_ID} STREQUAL "MSVC")
     add_definitions (-D_CRT_SECURE_NO_WARNINGS)
@@ -116,11 +114,14 @@ message (STATUS " + Platform is: ${PLATFORM}")
 message (STATUS " + Unit Tests: ${BUILD_TESTS}")
 message (STATUS "------------------------------------------------------------")
 
-# utility library and plugin manager header files are globally accessible
+# utility library and game header files are globally accessible
 include_directories ("${CMAKE_SOURCE_DIR}/util/include")
 include_directories ("${CMAKE_BINARY_DIR}/util/include")
+include_directories ("${CMAKE_SOURCE_DIR}/game/include")
+include_directories ("${CMAKE_BINARY_DIR}/game/include")
 
 add_subdirectory ("util")
+add_subdirectory ("game")
 add_subdirectory ("clither")
 
 if (BUILD_TESTS)

@@ -8,7 +8,7 @@ using namespace testing;
 
 TEST(NAME, init_with_tree_as_null_ptr)
 {
-    ASSERT_DEATH(ptree_init_ptree(NULL, NULL), ASSERTION_REGEX);
+    ASSERT_DEATH(ptree_init(NULL, NULL), ASSERTION_REGEX);
 }
 
 TEST(NAME, destroy_with_tree_as_null_ptr)

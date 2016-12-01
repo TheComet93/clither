@@ -13,7 +13,7 @@ TEST(NAME, init)
     list.count = 384;
     list.head = (struct list_node_t*)345;
     list.tail = (struct list_node_t*)232;
-    list_init_list(&list);
+    list_init(&list);
 
     EXPECT_THAT(list.count, Eq(0));
     EXPECT_THAT(list.head, IsNull());

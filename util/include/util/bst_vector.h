@@ -41,7 +41,7 @@ bstv_create(void);
  * @param[in] bstv The bstv object to initialise.
  */
 UTIL_PUBLIC_API void
-bstv_init_bstv(struct bstv_t* bstv);
+bstv_init(struct bstv_t* bstv);
 
 /*!
  * @brief Destroys an existing bstv object and FREEs the underlying memory.
@@ -188,10 +188,10 @@ bstv_clear_free(struct bstv_t* bstv);
     uint32_t hash_v;                                                                                                 \
     var_t* var_v;                                                                                                   \
     for(i_##var_v = 0;                                                                                   \
-    	i_##var_v != bstv_count(bstv) &&                                                                 \
-    		((hash_v = ((struct bstv_hash_value_t*) (bstv)->vector.data)[i_##var_v].hash) || 1) &&        \
-    		((var_v  = (var_t*)((struct bstv_hash_value_t*)(bstv)->vector.data)[i_##var_v].value) || 1); \
-    	++i_##var_v) {
+        i_##var_v != bstv_count(bstv) &&                                                                 \
+            ((hash_v = ((struct bstv_hash_value_t*) (bstv)->vector.data)[i_##var_v].hash) || 1) &&        \
+            ((var_v  = (var_t*)((struct bstv_hash_value_t*)(bstv)->vector.data)[i_##var_v].value) || 1); \
+        ++i_##var_v) {
 
 /*!
  * @brief Closes a for each scope previously opened by BSTV_FOR_EACH.

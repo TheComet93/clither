@@ -15,7 +15,7 @@ static void
 ptree_init_node(struct ptree_t* node, struct ptree_t* parent, void* value)
 {
     memset(node, 0, sizeof *node);
-    bsthv_init_bsthv(&node->children);
+    bsthv_init(&node->children);
     node->parent = parent;
     node->value = value;
 }
@@ -30,7 +30,7 @@ ptree_create(void* value)
     struct ptree_t* tree;
     if(!(tree = (struct ptree_t*)MALLOC(sizeof(struct ptree_t))))
     	return NULL;
-    ptree_init_ptree(tree, value);
+    ptree_init(tree, value);
     return tree;
 }
 
@@ -40,7 +40,7 @@ ptree_create(void* value)
  * This function will call ptree_init_node() to initialise the node.
  */
 void
-ptree_init_ptree(struct ptree_t* tree, void* value)
+ptree_init(struct ptree_t* tree, void* value)
 {
     assert(tree);
 
@@ -373,7 +373,7 @@ ptree_duplicate_children_into_existing_node(struct ptree_t* target,
      * In order to avoid circular copying, store all copied children in a
      * temporary bsthv before inserting them into the actual target tree.
      */
-    bsthv_init_bsthv(&temp);
+    bsthv_init(&temp);
     BSTHV_FOR_EACH(&source->children, struct ptree_t, key, node)
 
     	/* try to duplicate node and insert into temp map */

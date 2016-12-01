@@ -1,5 +1,3 @@
-set (BUILD_TYPE "SHARED")
-
 ###############################################################################
 # compiler flags for this library
 ###############################################################################
@@ -16,6 +14,7 @@ endif ()
 # generate config.h for this library
 ###############################################################################
 
+set (BUILD_TYPE "SHARED")
 set (PROJECT_NAME "UTIL")
 
 # memory debugging

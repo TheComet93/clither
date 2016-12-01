@@ -31,13 +31,13 @@ unordered_vector_create(const uint32_t element_size)
     struct unordered_vector_t* vector;
     if(!(vector = (struct unordered_vector_t*)MALLOC(sizeof(struct unordered_vector_t))))
     	return NULL;
-    unordered_vector_init_vector(vector, element_size);
+    unordered_vector_init(vector, element_size);
     return vector;
 }
 
 /* ------------------------------------------------------------------------- */
 void
-unordered_vector_init_vector(struct unordered_vector_t* vector, const uint32_t element_size)
+unordered_vector_init(struct unordered_vector_t* vector, const uint32_t element_size)
 {
     assert(vector);
     assert(element_size);

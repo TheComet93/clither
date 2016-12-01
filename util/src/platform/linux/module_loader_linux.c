@@ -9,7 +9,7 @@ module_open(const char* filename)
     void* handle = dlopen(filename, RTLD_LAZY);
     if(!handle)
     {
-    	fprintf(stderr, "Error loading plugin: %s\n", dlerror());
+    	fprintf(stderr, "Error loading library: %s\n", dlerror());
     	return NULL;
     }
     return handle;
@@ -28,7 +28,7 @@ module_sym(void* handle, const char* symbol)
     	const char* error = dlerror();
     	if(error)
     	{
-    		fprintf(stderr, "Error loading plugin: %s\n", error);
+    		fprintf(stderr, "Error loading library: %s\n", error);
     		return NULL;
     	}
     }

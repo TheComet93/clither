@@ -57,7 +57,7 @@ ptree_create(void* value);
  * @param[in] value The data for the root node to reference. Can be NULL.
  */
 UTIL_PUBLIC_API void
-ptree_init_ptree(struct ptree_t* tree, void* value);
+ptree_init(struct ptree_t* tree, void* value);
 
 /*!
  * @brief Destroys an existing ptree.

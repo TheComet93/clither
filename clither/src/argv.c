@@ -1,5 +1,5 @@
 #include "clither/argv.h"
-#include "clither/log.h"
+#include "game/log.h"
 #include "util/memory.h"
 #include <stdio.h>
 #include <string.h>
@@ -12,9 +12,9 @@ show_help(char* program_name)
     puts("\nGeneral Options:");
     printf("  %-30sPrint this help message\n",          "-h, --help");
     printf("  %-30sRun in server mode. This causes the "
-    		      "game to run as a dedicated server, allowing "
-    		      "multiple game instances to be hosted "
-    		      "simultaniously\n",                   "-s, --server");
+                  "game to run as a dedicated server, allowing "
+                  "multiple game instances to be hosted "
+                  "simultaniously\n",                   "-s, --server");
     printf("  %-30sThe startup config file to use\n",   "-c, --config <FILE>");
 }
 
@@ -34,7 +34,7 @@ argv_parse(int argc, char** argv)
     /* allocate argument object (return value) */
     arg_obj = (struct arg_obj_t*)MALLOC(sizeof(struct arg_obj_t));
     if(!arg_obj)
-    	OUT_OF_MEMORY("argv_parse()", NULL);
+        OUT_OF_MEMORY("argv_parse()", malloc_arg_obj_failed);
     memset(arg_obj, 0, sizeof(struct arg_obj_t));
 
     /* game should be run by default */
@@ -43,61 +43,63 @@ argv_parse(int argc, char** argv)
     /* for every argument */
     for(i = 1; i != argc; ++i)
     {
-    	arg = argv[i]; /* point to beginning of current argument */
+        arg = argv[i]; /* point to beginning of current argument */
 
-    	/* determine switch type */
-    	switch_type = NO_DASH;
-    	if(argv[i][0] == '-')
-    	{
-    		switch_type = SINGLE_DASH;
-    		++arg; /* ignore first dash */
-    		if(strlen(argv[i]) >= 2 && argv[i][1] == '-')
-    		{
-    			switch_type = DOUBLE_DASH;
-    			++arg; /* ignore second dash */
-    		}
-    	}
+        /* determine switch type */
+        switch_type = NO_DASH;
+        if(argv[i][0] == '-')
+        {
+            switch_type = SINGLE_DASH;
+            ++arg; /* ignore first dash */
+            if(strlen(argv[i]) >= 2 && argv[i][1] == '-')
+            {
+                switch_type = DOUBLE_DASH;
+                ++arg; /* ignore second dash */
+            }
+        }
 
-    	/* single dash? */
-    	if(switch_type == SINGLE_DASH)
-    	{
-    		/* For every character in argument */
-    		for(; *arg; ++arg)
-    		{
-    			/* display help */
-    			if(*arg == 'h')
-    				arg_obj->show_help = 1;
-    			/* server mode */
-    			if(*arg == 's')
-    				arg_obj->is_server = 1;
-    		}
-    	}
+        /* single dash? */
+        if(switch_type == SINGLE_DASH)
+        {
+            /* For every character in argument */
+            for(; *arg; ++arg)
+            {
+                /* display help */
+                if(*arg == 'h')
+                    arg_obj->show_help = 1;
+                /* server mode */
+                if(*arg == 's')
+                    arg_obj->is_server = 1;
+            }
+        }
 
-    	/* double dash? */
-    	if(switch_type == DOUBLE_DASH)
-    	{
-    		/* Double dash with no arguments? Stop parsing args */
-    		if(*arg == '\0')
-    			break;
+        /* double dash? */
+        if(switch_type == DOUBLE_DASH)
+        {
+            /* Double dash with no arguments? Stop parsing args */
+            if(*arg == '\0')
+                break;
 
-    		/* display help */
-    		if(strcmp(arg, "help") == 0)
-    			arg_obj->show_help = 1;
-    		/* server mode */
-    		if(strcmp(arg, "server") == 0)
-    			arg_obj->is_server = 1;
-    	}
+            /* display help */
+            if(strcmp(arg, "help") == 0)
+                arg_obj->show_help = 1;
+            /* server mode */
+            if(strcmp(arg, "server") == 0)
+                arg_obj->is_server = 1;
+        }
     }
 
     /* resolve any conflicts/dependencies in the switches*/
     if(arg_obj->show_help)     /* if the user requested help, don't start the game */
-    	arg_obj->run_game = 0;
+        arg_obj->run_game = 0;
 
     /* we are responsible to show help */
     if(arg_obj->show_help)
-    	show_help(argv[0]);
+        show_help(argv[0]);
 
     return arg_obj;
+
+    malloc_arg_obj_failed: return NULL;
 }
 
 /* -------------------------------------------------------------------------- */

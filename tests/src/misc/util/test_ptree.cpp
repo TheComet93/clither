@@ -60,7 +60,7 @@ TEST(NAME, init)
     tree.free_value = (ptree_free_func)230027;
     tree.value = (void*)928377;
 
-    ptree_init_ptree(&tree, &a);
+    ptree_init(&tree, &a);
 
     EXPECT_THAT(tree.children.vector.element_size, Eq(sizeof(struct bsthv_key_value_t)));
     EXPECT_THAT(tree.children.vector.capacity, Eq(0));
@@ -81,7 +81,7 @@ TEST(NAME, destroy_and_keep_root)
     // deallocated at all.
 
     struct ptree_t* tree = (struct ptree_t*)MALLOC(sizeof *tree);
-    ptree_init_ptree(tree, NULL);
+    ptree_init(tree, NULL);
     ptree_destroy_keep_root(tree);
     FREE(tree);
 }

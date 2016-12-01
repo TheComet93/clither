@@ -53,8 +53,8 @@ ordered_vector_create(const uint32_t element_size);
  * want the vector to store. Typically one would pass sizeof(my_data_type).
  */
 UTIL_PUBLIC_API void
-ordered_vector_init_vector(struct ordered_vector_t* vector,
-    						 const uint32_t element_size);
+ordered_vector_init(struct ordered_vector_t* vector,
+                    const uint32_t element_size);
 
 /*!
  * @brief Destroys an existing vector object and frees all memory allocated by
@@ -236,8 +236,8 @@ ordered_vector_get_element(struct ordered_vector_t*, uint32_t index);
     var_type* var;                                                           \
     DATA_POINTER_TYPE* internal_##var_end_of_vector = (vector)->data + (vector)->count * (vector)->element_size; \
     for(var = (var_type*)(vector)->data;                                     \
-    	(DATA_POINTER_TYPE*)var != internal_##var_end_of_vector;             \
-    	var = (var_type*)(((DATA_POINTER_TYPE*)var) + (vector)->element_size)) {
+        (DATA_POINTER_TYPE*)var != internal_##var_end_of_vector;             \
+        var = (var_type*)(((DATA_POINTER_TYPE*)var) + (vector)->element_size)) {
 
 /*!
  * @brief Convenient macro for iterating a range of a vector's elements.
@@ -255,8 +255,8 @@ ordered_vector_get_element(struct ordered_vector_t*, uint32_t index);
     var_type* var;                                                                     \
     DATA_POINTER_TYPE* internal_##var_end_of_vector = (vector)->data + end_index * (vector)->element_size; \
     for(var = (var_type*)((vector)->data + begin_index * (vector)->element_size);      \
-    	(DATA_POINTER_TYPE*)var != internal_##var_end_of_vector;                       \
-    	var = (var_type*)(((DATA_POINTER_TYPE*)var) + (vector)->element_size)) {
+        (DATA_POINTER_TYPE*)var != internal_##var_end_of_vector;                       \
+        var = (var_type*)(((DATA_POINTER_TYPE*)var) + (vector)->element_size)) {
 
 /*!
  * @brief Closes a for each scope previously opened by ORDERED_VECTOR_FOR_EACH.

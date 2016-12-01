@@ -71,7 +71,7 @@ bsthv_create(void);
  * @param[in] bsthv The bsthv object to initialise.
  */
 UTIL_PUBLIC_API void
-bsthv_init_bsthv(struct bsthv_t* bsthv);
+bsthv_init(struct bsthv_t* bsthv);
 
 /*!
  * @brief Destroys an existing bsthv object and FREEs the underlying memory.
@@ -171,8 +171,8 @@ bsthv_erase_element(struct bsthv_t* bsthv, void* value);
 
 UTIL_PUBLIC_API void*
 bsthv_erase_key_value_object(struct bsthv_t* bsthv,
-    						 const char* key,
-    						 struct bsthv_key_value_t* kv);
+                             const char* key,
+                             struct bsthv_key_value_t* kv);
 
 /*!
  * @brief Erases the entire bsthv, including the underlying memory.
@@ -207,15 +207,15 @@ bsthv_clear_free(struct bsthv_t* bsthv);
     struct bsthv_key_value_t* kv_##var_v; \
     var_t* var_v;                                                                                       \
     for(i_##var_v = 0;                                                                                   \
-    	i_##var_v != (bsthv_v)->vector.count &&                                                     \
-    		(kv_##var_v = (((struct bsthv_key_value_t*)(bsthv_v)->vector.data) + i_##var_v));       \
-    	++i_##var_v) { \
-    	struct bsthv_value_chain_t* vc_##var_v = &(kv_##var_v)->value_chain; \
-    	const char* key_v; \
-    	for(; vc_##var_v && \
-    		((key_v = (vc_##var_v)->key) || 1) && \
-    		((var_v = (var_t*)(vc_##var_v)->value) || 1); \
-    	    vc_##var_v = (vc_##var_v)->next) {
+        i_##var_v != (bsthv_v)->vector.count &&                                                     \
+            (kv_##var_v = (((struct bsthv_key_value_t*)(bsthv_v)->vector.data) + i_##var_v));       \
+        ++i_##var_v) { \
+        struct bsthv_value_chain_t* vc_##var_v = &(kv_##var_v)->value_chain; \
+        const char* key_v; \
+        for(; vc_##var_v && \
+            ((key_v = (vc_##var_v)->key) || 1) && \
+            ((var_v = (var_t*)(vc_##var_v)->value) || 1); \
+            vc_##var_v = (vc_##var_v)->next) {
 
 /*!
  * @brief Closes a for each scope previously opened by BSTV_FOR_EACH.

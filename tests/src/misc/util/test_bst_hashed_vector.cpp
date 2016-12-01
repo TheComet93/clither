@@ -13,7 +13,7 @@ TEST(NAME, init_sets_correct_values)
     bsthv.vector.data = (DATA_POINTER_TYPE*)4783;
     bsthv.vector.element_size = 283;
 
-    bsthv_init_bsthv(&bsthv);
+    bsthv_init(&bsthv);
     ASSERT_EQ(0, bsthv.vector.count);
 
     ASSERT_EQ(0, bsthv.vector.capacity);

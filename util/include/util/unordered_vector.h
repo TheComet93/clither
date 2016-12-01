@@ -54,8 +54,8 @@ unordered_vector_create(const uint32_t element_size);
  * want the vector to store. Typically one would pass sizeof(my_data_type).
  */
 UTIL_PUBLIC_API void
-unordered_vector_init_vector(struct unordered_vector_t* vector,
-    						 const uint32_t element_size);
+unordered_vector_init(struct unordered_vector_t* vector,
+                      const uint32_t element_size);
 
 /*!
  * @brief Destroys an existing vector object and frees all memory allocated by
@@ -165,7 +165,7 @@ unordered_vector_erase_index(struct unordered_vector_t* vector, uint32_t index);
  */
 UTIL_PUBLIC_API void
 unordered_vector_erase_element(struct unordered_vector_t* vector,
-    						   void* element);
+                               void* element);
 
 /*!
  * @brief Gets a pointer to the specified element in the vector.
@@ -203,8 +203,8 @@ unordered_vector_get_element(struct unordered_vector_t*, uint32_t index);
     var_type* var;                                                                                \
     DATA_POINTER_TYPE* end_of_vector = (vector)->data + (vector)->count * (vector)->element_size; \
     for(var = (var_type*)(vector)->data;                                                          \
-    	(DATA_POINTER_TYPE*)var != end_of_vector;                                                 \
-    	var = (var_type*)(((DATA_POINTER_TYPE*)var) + (vector)->element_size)) {
+        (DATA_POINTER_TYPE*)var != end_of_vector;                                                 \
+        var = (var_type*)(((DATA_POINTER_TYPE*)var) + (vector)->element_size)) {
 
 /*!
  * @brief Closes a for each scope previously opened by UNORDERED_VECTOR_FOR_EACH.

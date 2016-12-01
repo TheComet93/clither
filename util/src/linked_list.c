@@ -12,13 +12,13 @@ list_create(void)
     struct list_t* list;
     if(!(list = (struct list_t*)MALLOC(sizeof(struct list_t))))
     	return NULL;
-    list_init_list(list);
+    list_init(list);
     return list;
 }
 
 /* ------------------------------------------------------------------------- */
 void
-list_init_list(struct list_t* list)
+list_init(struct list_t* list)
 {
     assert(list);
     memset(list, 0, sizeof(struct list_t));

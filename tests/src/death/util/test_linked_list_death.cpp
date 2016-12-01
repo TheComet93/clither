@@ -8,7 +8,7 @@ using namespace testing;
 
 TEST(NAME, init_list_null_ptr)
 {
-    ASSERT_DEATH(list_init_list(NULL), ASSERTION_REGEX);
+    ASSERT_DEATH(list_init(NULL), ASSERTION_REGEX);
 }
 
 TEST(NAME, destroy_null_ptr)

@@ -78,7 +78,7 @@ memory_init(void)
      * would be wrong in the case of MALLOC() never being called.
      */
     ignore_bstv_malloc = 1;
-    	bstv_init_bstv(&report);
+    	bstv_init(&report);
     	bstv_insert(&report, 0, NULL); bstv_erase(&report, 0);
     ignore_bstv_malloc = 0;
 

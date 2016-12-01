@@ -8,7 +8,7 @@ using namespace testing;
 
 TEST(NAME, init_with_vector_as_null_ptr)
 {
-    ASSERT_DEATH(unordered_vector_init_vector(NULL, sizeof(int)), ASSERTION_REGEX);
+    ASSERT_DEATH(unordered_vector_init(NULL, sizeof(int)), ASSERTION_REGEX);
 }
 
 TEST(NAME, destroy_with_vector_as_null_ptr)

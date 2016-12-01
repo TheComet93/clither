@@ -2,13 +2,27 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "clither/log.h"
-#include "clither/game.h"
+#include "game/log.h"
+#include "game/game.h"
 #include "util/memory.h"
 
 #ifdef ENABLE_LOG_TIMESTAMPS
 #   include <time.h>
 #endif
+
+/* ------------------------------------------------------------------------- */
+char
+log_global_open(void)
+{
+
+}
+
+/* ------------------------------------------------------------------------- */
+void
+log_global_close(void)
+{
+
+}
 
 /* ------------------------------------------------------------------------- */
 char

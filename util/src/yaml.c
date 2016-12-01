@@ -32,7 +32,7 @@ yaml_init_node(struct ptree_t* node);
 void
 yaml_init(void)
 {
-    list_init_list(&g_open_docs);
+    list_init(&g_open_docs);
 }
 
 /* ------------------------------------------------------------------------- */

@@ -34,13 +34,13 @@ ordered_vector_create(const uint32_t element_size)
     struct ordered_vector_t* vector;
     if(!(vector = (struct ordered_vector_t*)MALLOC(sizeof(struct ordered_vector_t))))
     	return NULL;
-    ordered_vector_init_vector(vector, element_size);
+    ordered_vector_init(vector, element_size);
     return vector;
 }
 
 /* ------------------------------------------------------------------------- */
 void
-ordered_vector_init_vector(struct ordered_vector_t* vector, const uint32_t element_size)
+ordered_vector_init(struct ordered_vector_t* vector, const uint32_t element_size)
 {
     assert(vector);
     memset(vector, 0, sizeof(struct ordered_vector_t));

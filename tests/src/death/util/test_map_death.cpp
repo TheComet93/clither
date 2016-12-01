@@ -8,7 +8,7 @@ using namespace testing;
 
 TEST(NAME, init_with_bstv_as_null_ptr)
 {
-    ASSERT_DEATH(bstv_init_bstv(NULL), ASSERTION_REGEX);
+    ASSERT_DEATH(bstv_init(NULL), ASSERTION_REGEX);
 }
 
 TEST(NAME, destroy_with_bstv_as_null_ptr)

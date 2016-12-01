@@ -14,43 +14,19 @@ endif ()
 # source files and runtime definition
 ###############################################################################
 
-file (GLOB clither_HEADERS "include/clither/*.h")
-file (GLOB clither_SOURCES "src/*.c")
-
-set (clither_HEADERS ${clither_HEADERS}
-    "include/clither/config.h.in"
-)
+add_executable (clither
+    "src/main.c"
+    "src/argv.c"
+    "include/clither/argv.h")
 
 include_directories ("include")
 
-add_executable (clither
-    ${clither_HEADERS}
-    ${clither_SOURCES}
-)
-
-if(${PLATFORM} MATCHES "LINUX" OR ${PLATFORM} MATCHES "MACOSX")
-    set (MATH_LIB m)
-endif ()
-
-target_link_libraries (clither
-    ${MATH_LIB}
-    util
-)
+target_link_libraries (clither util)
+target_link_libraries (clither game)
 
 # generates the correct project files for visual studio, setting the correct
 # debug working directory and other stuff
 create_vcproj_userfile (clither)
-
-###############################################################################
-# generate config.h and export.h
-###############################################################################
-
-set (PROJECT_NAME "CLITHER")
-
-configure_file ("include/clither/config.h.in"
-                "include/clither/config.h")
-
-include_directories ("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 ###############################################################################
 # install targets
@@ -59,12 +35,6 @@ include_directories ("${CMAKE_CURRENT_BINARY_DIR}/include")
 install (
     TARGETS
         clither
-    DESTINATION
-        "bin"
-)
-install (
-    DIRECTORY
-        "${CMAKE_CURRENT_LIST_DIR}/cfg"
     DESTINATION
         "bin"
 )

@@ -11,7 +11,7 @@ TEST(NAME, init)
     vec.count = 384;
     vec.data = (DATA_POINTER_TYPE*)4859;
     vec.element_size = 183;
-    unordered_vector_init_vector(&vec, sizeof(int));
+    unordered_vector_init(&vec, sizeof(int));
     
     ASSERT_EQ(0, vec.capacity);
     ASSERT_EQ(0, vec.count);

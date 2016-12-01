@@ -1,9 +1,7 @@
 #ifndef CLITHER_LOG_H
 #define CLITHER_LOG_H
 
-#include "util/pstdint.h"
-#include "util/config.h"
-#include "clither/config.h"
+#include "game/config.h"
 
 C_HEADER_BEGIN
 
@@ -33,11 +31,24 @@ typedef enum log_level_e
 } log_level_e;
 
 /*!
- * @brief Initialises the log for the specified game object. Must be called
- * before llog() can be called with a non-NULL game object.
+ * @brief Opens the global log. This is where messages are logged to that
+ * aren't part of a game object (call log_message() with NULL game object).
  */
 char
-log_init(struct game_t* game);
+log_global_open(void);
+
+void
+log_global_close(void);
+
+/*!
+ * @brief Initialises the log for the specified game object. Must be called
+ * before log_message() can be called with a non-NULL game object.
+ */
+char
+log_open(struct game_t* game);
+
+char
+log_close(struct game_t* game);
 
 void
 log_set_events(struct event_t* on_indent, struct event_t* on_unindent, struct event_t* on_log);

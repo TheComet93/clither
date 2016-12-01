@@ -13,7 +13,7 @@ TEST(NAME, init_sets_correct_values)
     bstv.vector.data = (DATA_POINTER_TYPE*)4783;
     bstv.vector.element_size = 283;
 
-    bstv_init_bstv(&bstv);
+    bstv_init(&bstv);
     ASSERT_EQ(0, bstv.vector.count);
 
     ASSERT_EQ(0, bstv.vector.capacity);

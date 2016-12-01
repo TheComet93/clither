@@ -13,16 +13,16 @@ bstv_create(void)
     struct bstv_t* bstv;
     if(!(bstv = (struct bstv_t*)MALLOC(sizeof *bstv)))
     	return NULL;
-    bstv_init_bstv(bstv);
+    bstv_init(bstv);
     return bstv;
 }
 
 /* ------------------------------------------------------------------------- */
 void
-bstv_init_bstv(struct bstv_t* bstv)
+bstv_init(struct bstv_t* bstv)
 {
     assert(bstv);
-    ordered_vector_init_vector(&bstv->vector, sizeof(struct bstv_hash_value_t));
+    ordered_vector_init(&bstv->vector, sizeof(struct bstv_hash_value_t));
 }
 
 /* ------------------------------------------------------------------------- */

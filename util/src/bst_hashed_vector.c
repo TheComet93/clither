@@ -36,17 +36,17 @@ bsthv_create(void)
     struct bsthv_t* bsthv;
     if(!(bsthv = (struct bsthv_t*)MALLOC(sizeof *bsthv)))
     	return NULL;
-    bsthv_init_bsthv(bsthv);
+    bsthv_init(bsthv);
     return bsthv;
 }
 
 /* ------------------------------------------------------------------------- */
 void
-bsthv_init_bsthv(struct bsthv_t* bsthv)
+bsthv_init(struct bsthv_t* bsthv)
 {
     assert(bsthv);
     bsthv->count = 0;
-    ordered_vector_init_vector(&bsthv->vector, sizeof(struct bsthv_key_value_t));
+    ordered_vector_init(&bsthv->vector, sizeof(struct bsthv_key_value_t));
 }
 
 /* ------------------------------------------------------------------------- */

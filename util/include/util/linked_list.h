@@ -38,7 +38,7 @@ list_create(void);
  * NULL).
  */
 UTIL_PUBLIC_API void
-list_init_list(struct list_t* list);
+list_init(struct list_t* list);
 
 /*!
  * @brief Destroys a list.
