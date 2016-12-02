@@ -46,6 +46,7 @@ bsthv_init(struct bsthv_t* bsthv)
 {
     assert(bsthv);
     ordered_vector_init(&bsthv->vector, sizeof(struct bsthv_key_value_t));
+    bsthv->count = 0;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -141,6 +142,8 @@ bsthv_insert(struct bsthv_t* bsthv, const char* key, void* value)
         /* value */
         vc->next->value = value;
 
+        ++(bsthv->count);
+
         return 1;
     }
 
@@ -166,6 +169,7 @@ bsthv_insert(struct bsthv_t* bsthv, const char* key, void* value)
         return 0;
     }
 
+    ++(bsthv->count);
     return 1;
 }
 
@@ -362,6 +366,7 @@ bsthv_erase_key_value_object(struct bsthv_t* bsthv,
         void* value = kv->value_chain.value;
         free_string(kv->value_chain.key);
         ordered_vector_erase_element(&bsthv->vector, kv);
+        --(bsthv->count);
         return value;
     }
 
@@ -382,6 +387,7 @@ bsthv_erase_key_value_object(struct bsthv_t* bsthv,
         FREE(replacement);
 
         /* done */
+        --(bsthv->count);
         return ret_value;
     }
 
@@ -399,6 +405,7 @@ bsthv_erase_key_value_object(struct bsthv_t* bsthv,
             free_string(vc->key);
             parent_vc->next = vc->next; /* unlink this value by linking next with parent */
             FREE(vc);
+            --(bsthv->count);
             return value;
         }
         parent_vc = vc;
@@ -451,6 +458,7 @@ bsthv_clear(struct bsthv_t* bsthv)
     assert(bsthv);
     bsthv_free_all_chains_and_keys(bsthv);
     ordered_vector_clear(&bsthv->vector);
+    bsthv->count = 0;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -459,5 +467,6 @@ void bsthv_clear_free(struct bsthv_t* bsthv)
     assert(bsthv);
     bsthv_free_all_chains_and_keys(bsthv);
     ordered_vector_clear_free(&bsthv->vector);
+    bsthv->count = 0;
 }
 

@@ -30,6 +30,7 @@ struct bsthv_key_value_t
 struct bsthv_t
 {
     struct ordered_vector_t     vector;  /* container for bsthv_key_value_t objects */
+    uint32_t count;
 };
 
 /*!
@@ -191,7 +192,7 @@ bsthv_clear_free(struct bsthv_t* bsthv);
  * @param[in] bsthv The bsthv to count the elements of.
  * @return The number of elements in the specified bsthv.
  */
-#define bsthv_count(bsthv) ((bsthv)->vector.count)
+#define bsthv_count(bsthv) ((bsthv)->count)
 
 /*!
  * @brief Iterates over the specified bsthv's elements and opens a FOR_EACH
