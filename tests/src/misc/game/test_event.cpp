@@ -92,7 +92,36 @@ TEST(NAME, fire_to_multiple_listeners)
     event_system_destroy(&game);
 }
 
+TEST(NAME, unregister_all_listeners)
+{
+    game_t game;
+    ASSERT_THAT(event_system_create(&game), Ne(0));
+
+    event_t* event = event_register(&game, "event");
+    ASSERT_THAT(event, NotNull());
+
+    event_register_listener(event, listener1);
+    event_register_listener(event, listener2);
+    g_counter1 = 0; g_counter2 = 0;
+
+    event_unregister_all_listeners(event);
+    event_fire(event, NULL);
+    EXPECT_THAT(g_counter1, Eq(0));
+    EXPECT_THAT(g_counter2, Eq(0));
+
+    event_system_destroy(&game);
+}
+
 TEST(NAME, cleanup)
 {
+    game_t game;
+    ASSERT_THAT(event_system_create(&game), Ne(0));
 
+    event_t* event = event_register(&game, "event");
+    ASSERT_THAT(event, NotNull());
+
+    event_register_listener(event, listener1);
+    event_register_listener(event, listener2);
+
+    event_system_destroy(&game);
 }
