@@ -35,10 +35,17 @@ set (game_HEADERS ${game_HEADERS}
     ${EXPORT_H_TEMPLATE}
 )
 
-set (VULKAN_ROOT "${CMAKE_SOURCE_DIR}/VulkanSDK/linux/1.0.30.0/x86_64" CACHE STRING "")
+set (VULKAN_ARCHITECTURE "x86_64" CACHE STRING "Architecture to use. Defaults to x86_64")
+find_path (VULKAN_ROOT "${VULKAN_ARCHITECTURE}/include/vulkan/vulkan.h"
+    PATHS "${CMAKE_SOURCE_DIR}/VulkanSDK/linux/1.0.30.0"
+          "${CMAKE_SOURCE_DIR}/VulkanSDK/linux/1.0.33.0")
+message (STATUS "Found vulkan under ${VULKAN_ROOT}")
+if (NOT VULKAN_ROOT)
+    message (FATAL_ERROR "Failed to find vulkan")
+endif ()
 
 include_directories ("include")
-include_directories ("${VULKAN_ROOT}/include")
+include_directories ("${VULKAN_ROOT}/${VULKAN_ARCHITECTURE}/include")
 
 add_library (game ${BUILD_TYPE}
     ${game_HEADERS}
@@ -60,7 +67,7 @@ target_link_libraries (game util)
 create_vcproj_userfile (game)
 
 add_custom_command (TARGET game POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy "${VULKAN_ROOT}/lib/*" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    COMMAND ${CMAKE_COMMAND} -E copy "${VULKAN_ROOT}/${VULKAN_ARCHITECTURE}/lib/*" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 ###############################################################################
 # install targets
