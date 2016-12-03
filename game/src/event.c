@@ -8,11 +8,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-struct event_listener_t
-{
-    event_callback_func callback;
-};
-
 /* ----------------------------------------------------------------------------
  * Static functions
  * ------------------------------------------------------------------------- */
@@ -64,7 +59,11 @@ event_register(struct game_t* game, const char* name)
     if(!(event = (struct event_t*)MALLOC(sizeof(struct event_t), "event_create()")))
         goto malloc_event_failed;
 
+    /* listener container */
     unordered_vector_init(&event->listeners, sizeof(struct event_listener_t));
+
+    /* event has reference to game object */
+    event->game = game;
 
     /* copy name */
     if((event->name = malloc_string(name)) == NULL)
@@ -84,7 +83,7 @@ event_register(struct game_t* game, const char* name)
 
 /* ------------------------------------------------------------------------- */
 void
-event_destroy(struct event_t* event)
+event_unregister(struct event_t* event)
 {
     assert(event);
     assert(event->game);

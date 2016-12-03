@@ -9,6 +9,11 @@ struct game_t;
 
 typedef void (*event_callback_func)(struct event_t*, void*);
 
+struct event_listener_t
+{
+    event_callback_func callback;
+};
+
 struct event_t
 {
     char* name;
@@ -98,5 +103,12 @@ event_unregister_listener(struct event_t* event,
  */
 GAME_PUBLIC_API void
 event_unregister_all_listeners(struct event_t* event);
+
+#define event_fire(event, data) do {                   \
+        UNORDERED_VECTOR_FOR_EACH(&(event)->listeners, struct event_listener_t, listener_##event) \
+            (listener_##event)->callback(event, data); \
+        UNORDERED_VECTOR_END_EACH                      \
+    } while(0)
+
 
 C_HEADER_END

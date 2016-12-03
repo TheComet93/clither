@@ -202,19 +202,19 @@ bsthv_clear_free(struct bsthv_t* bsthv);
  * @param[in] var The name to give the variable pointing to the current
  * element.
  */
-#define BSTHV_FOR_EACH(bsthv_v, var_t, key_v, var_v) {                                          \
-    uint32_t i_##var_v;                                                                        \
-    struct bsthv_key_value_t* kv_##var_v; \
-    var_t* var_v;                                                                                       \
-    for(i_##var_v = 0;                                                                                   \
-        i_##var_v != (bsthv_v)->vector.count &&                                                     \
-            (kv_##var_v = (((struct bsthv_key_value_t*)(bsthv_v)->vector.data) + i_##var_v));       \
-        ++i_##var_v) { \
-        struct bsthv_value_chain_t* vc_##var_v = &(kv_##var_v)->value_chain; \
-        const char* key_v; \
-        for(; vc_##var_v && \
-            ((key_v = (vc_##var_v)->key) || 1) && \
-            ((var_v = (var_t*)(vc_##var_v)->value) || 1); \
+#define BSTHV_FOR_EACH(bsthv_v, var_t, key_v, var_v) {                                        \
+    uint32_t i_##var_v;                                                                       \
+    struct bsthv_key_value_t* kv_##var_v;                                                     \
+    var_t* var_v;                                                                             \
+    for(i_##var_v = 0;                                                                        \
+        i_##var_v != (bsthv_v)->vector.count &&                                               \
+            (kv_##var_v = (((struct bsthv_key_value_t*)(bsthv_v)->vector.data) + i_##var_v)); \
+        ++i_##var_v) {                                                                        \
+        struct bsthv_value_chain_t* vc_##var_v = &(kv_##var_v)->value_chain;                  \
+        const char* key_v;                                                                    \
+        for(; vc_##var_v &&                                                                   \
+            ((key_v = (vc_##var_v)->key) || 1) &&                                             \
+            ((var_v = (var_t*)(vc_##var_v)->value) || 1);                                     \
             vc_##var_v = (vc_##var_v)->next) {
 
 /*!

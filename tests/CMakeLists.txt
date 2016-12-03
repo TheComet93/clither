@@ -10,6 +10,8 @@ file (GLOB tests_SOURCES_UTIL
             "src/env/util/*.cpp"
             "src/malloc/util/*.cpp"
             "src/misc/util/*.cpp")
+file (GLOB tests_SOURCES_GAME
+            "src/misc/game/*.cpp")
 file (GLOB tests_HEADERS
             "include/tests/*.hpp")
 
@@ -30,15 +32,13 @@ message (STATUS "------------------------------------------------------------")
 
 add_executable (clither_tests
     ${tests_HEADERS}
-    ${tests_SOURCES}
     ${tests_SOURCES_UTIL}
-    ${tests_SOURCES_FRAMEWORK}
+    ${tests_SOURCES_GAME}
 )
 
-target_link_libraries (clither_tests
-    util
-    gmock_main
-)
+target_link_libraries (clither_tests util)
+target_link_libraries (clither_tests game)
+target_link_libraries (clither_tests gmock_main)
 
 # generates the correct project files for visual studio, setting the correct
 # debug working directory and other stuff
