@@ -1,9 +1,9 @@
 #include "game/renderer_impl.h"
-
+#include "game/log.h"
 #include "util/module_loader.h"
 #include "util/memory.h"
-
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 
@@ -16,16 +16,13 @@
 #endif
 
 static char
-checkVulkanResult(VkResult result, char* msg);
+load_vulkan_library(struct vulkan_t* vk);
 
 static char
-loadVulkanLibrary(struct vulkan_t* vk);
-
-static char
-loadValidationLayer(struct vulkan_t* vk);
+load_validation_layer(struct vulkan_t* vk);
 
 static void
-unloadVulkanLibrary(struct vulkan_t* vk);
+unload_vulkan_library(struct vulkan_t* vk);
 
 /* ------------------------------------------------------------------------- */
 /* Vulkan should use our debug memory allocation */
@@ -34,50 +31,66 @@ unloadVulkanLibrary(struct vulkan_t* vk);
  * PFN_vkAllocationFunction implementation
  */
 static void*
-allocationFunction(void* pUserData, size_t  size,  size_t  alignment, VkSystemAllocationScope allocationScope)
+allocation_function(void* pUserData, size_t  size,  size_t  alignment, VkSystemAllocationScope allocationScope)
 {
     /* Ignore alignment, for while */
     return MALLOC(size, "allocationFunction() (vulkan malloc wrapper)"); /*_aligned_malloc(size, alignment); */
 }
 
+void* reallocation_function(void*   pUserData,   void*   pOriginal,  size_t  size, size_t  alignment,  VkSystemAllocationScope allocationScope)
+{
+    printf("pAllocator's REallocationFunction: size %u, alignment %u, allocationScope %d \n",
+    size, alignment, allocationScope);
+    return realloc(pOriginal, size);
+ }
+
 /*
  * The PFN_vkFreeFunction implementation
  */
 static void
-freeFunction(void* pUserData, void* pMemory)
+free_function(void* pUserData, void* pMemory)
 {
     FREE(pMemory);
 }
 
 VkAllocationCallbacks g_vkAllocators = {
     NULL,                 /* pUserData;             */
-    allocationFunction,   /* pfnAllocation;         */
-    NULL,                 /* pfnReallocation;       */
-    freeFunction,         /* pfnFree;               */
+    allocation_function,  /* pfnAllocation;         */
+    reallocation_function,/* pfnReallocation;       */
+    free_function,        /* pfnFree;               */
     NULL,                 /* pfnInternalAllocation; */
     NULL                  /* pfnInternalFree;       */
 };
 
 /* ------------------------------------------------------------------------- */
 struct renderer_t*
-renderer_create(void)
+renderer_create(struct game_t* game)
 {
     struct renderer_t* renderer;
     if(!(renderer = (struct renderer_t*)MALLOC(sizeof *renderer, "renderer_create()")))
         return NULL;
-    renderer_init(renderer);
+
+    if(!renderer_init(renderer, game))
+    {
+        FREE(renderer);
+        return NULL;
+    }
+
     return renderer;
 }
 
 /* ------------------------------------------------------------------------- */
 char
-renderer_init(struct renderer_t* renderer)
+renderer_init(struct renderer_t* renderer, struct game_t* game)
 {
     assert(renderer);
-    memset(renderer, 0, sizeof *renderer);
 
-    if(!loadVulkanLibrary(&renderer->vk))
-        return 0;
+    renderer->game = game;
+    renderer->width = 800;
+    renderer->height = 600;
+
+    if(!load_vulkan_library(&renderer->vk))
+        goto load_vulkan_library_failed;
 
     renderer->vk.application_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO; /* sType is a member of all structs  */
     renderer->vk.application_info.pNext = NULL;                               /* as is pNext and flag              */
@@ -95,16 +108,20 @@ renderer_init(struct renderer_t* renderer)
         instanceInfo.enabledExtensionCount = 0;
         instanceInfo.ppEnabledExtensionNames = NULL;
 
-        if(!checkVulkanResult(
-            renderer->vk.vkCreateInstance(
+        if(renderer->vk.vkCreateInstance(
                 &instanceInfo,
                 &g_vkAllocators,
-                &renderer->vk.context.instance),
-            "Failed to create vulkan instance"))
-            return 0;
+                &renderer->vk.context.instance) != VK_SUCCESS)
+        {
+            log_message(LOG_FATAL, game, "Failed to create vulkan instance");
+            goto create_vulkan_instance_failed;
+        }
     }
 
     return 1;
+
+    create_vulkan_instance_failed : unload_vulkan_library(&renderer->vk);
+    load_vulkan_library_failed    : return 0;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -113,7 +130,8 @@ renderer_destroy(struct renderer_t* renderer)
 {
     assert(renderer);
 
-    unloadVulkanLibrary(&renderer->vk);
+    renderer->vk.vkDestroyInstance(renderer->vk.context.instance, &g_vkAllocators);
+    unload_vulkan_library(&renderer->vk);
 
     FREE(renderer);
 }
@@ -124,35 +142,25 @@ renderer_destroy(struct renderer_t* renderer)
 
 /* ------------------------------------------------------------------------- */
 static char
-checkVulkanResult(VkResult result, char* msg)
-{
-    if(result != VK_SUCCESS)
-    {
-        fprintf(stderr, "%s", msg);
-        return 0;
-    }
-
-    return 1;
-}
-
-/* ------------------------------------------------------------------------- */
-static char
-loadVulkanLibrary(struct vulkan_t* vk)
+load_vulkan_library(struct vulkan_t* vk)
 {
     vk->module = module_open(VULKAN_LIB);
     if(vk->module == NULL)
         goto open_module_failed;
 
-    if(!(vk->vkCreateInstance                   = *(PFN_vkCreateInstance*)                  module_sym(vk->module, "vkCreateInstance")))                   goto load_symbol_failed;
-    if(!(vk->vkEnumerateInstanceLayerProperties = *(PFN_vkEnumerateInstanceLayerProperties*)module_sym(vk->module, "vkEnumerateInstanceLayerProperties"))) goto load_symbol_failed;
+    if(!(*(void**)&vk->vkCreateInstance                   = module_sym(vk->module, "vkCreateInstance")))                   goto load_symbol_failed;
+    if(!(*(void**)&vk->vkDestroyInstance                  = module_sym(vk->module, "vkDestroyInstance")))                  goto load_symbol_failed;
+    if(!(*(void**)&vk->vkEnumerateInstanceLayerProperties = module_sym(vk->module, "vkEnumerateInstanceLayerProperties"))) goto load_symbol_failed;
 
-    load_symbol_failed: unloadVulkanLibrary(vk);
+    return 1;
+
+    load_symbol_failed: unload_vulkan_library(vk);
     open_module_failed: return 0;
 }
 
 /* ------------------------------------------------------------------------- */
 static char
-loadValidationLayer(struct vulkan_t* vk)
+load_validation_layer(struct vulkan_t* vk)
 {
     uint32_t layer_count = 0;
     vk->vkEnumerateInstanceLayerProperties(&layer_count, NULL);
@@ -166,7 +174,7 @@ loadValidationLayer(struct vulkan_t* vk)
 
 /* ------------------------------------------------------------------------- */
 static void
-unloadVulkanLibrary(struct vulkan_t* vk)
+unload_vulkan_library(struct vulkan_t* vk)
 {
     assert(vk);
     if(vk->module)

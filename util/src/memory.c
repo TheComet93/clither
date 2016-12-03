@@ -79,7 +79,8 @@ memory_init(void)
      */
     ignore_bstv_malloc = 1;
         bstv_init(&report);
-        bstv_insert(&report, 0, NULL); bstv_erase(&report, 0);
+        bstv_insert(&report, 0, NULL);
+        bstv_erase(&report, 0);
     ignore_bstv_malloc = 0;
 
     MUTEX_INIT(mutex)
@@ -153,7 +154,7 @@ malloc_wrapper_debug(uintptr_t size, const char* msg)
                 fprintf(stderr,
                 "[memory] WARNING: Hash collision occurred when inserting\n"
                 "into memory report bstv. On 64-bit systems the pointers are\n"
-                "rounded down to 32-bit unsigned integers, so even though\n"
+                "truncated to 32-bit unsigned integers, so even though\n"
                 "it's rare, collisions can happen.\n\n"
                 "The matching call to FREE() will generate a warning saying\n"
                 "something is being freed that was never allocated. This is to\n"

@@ -1,23 +1,25 @@
 #include <stdio.h>
 #include "util/memory.h"
 #include "clither/argv.h"
-#include "game/renderer.h"
+#include "game/game.h"
 
 int
 main(int argc, char** argv)
 {
     struct arg_obj_t* args;
-    struct renderer_t* renderer;
+    struct game_t* game;
 
     memory_init();
-    renderer = renderer_create();
 
     /* parse command line arguments */
     args = argv_parse(argc, argv);
 
+    game = game_create("game");
+    if(game)
+        game_destroy(game);
+
     /* clean up */
     argv_free(args);
-    renderer_destroy(renderer);
     memory_deinit();
 
     return 0;

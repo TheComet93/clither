@@ -13,17 +13,18 @@ struct vulkan_context_t
 struct vulkan_t
 {
     void* module;
+    VkApplicationInfo application_info;
+
+    struct vulkan_context_t context;
 
     PFN_vkCreateInstance                    vkCreateInstance;
+    PFN_vkDestroyInstance                   vkDestroyInstance;
     PFN_vkEnumerateInstanceLayerProperties  vkEnumerateInstanceLayerProperties;
-
-    VkApplicationInfo application_info;
-    struct vulkan_context_t context;
 };
 
 struct renderer_t
 {
+    struct game_t* game;
     uint32_t width, height;
-
     struct vulkan_t vk;
 };

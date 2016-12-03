@@ -3,12 +3,13 @@
 
 C_HEADER_BEGIN
 
-struct event_system_t;
+struct renderer_t;
 
 struct game_t
 {
     char* name;
     struct bsthv_t events;
+    struct renderer_t* renderer;
 };
 
 GAME_PUBLIC_API struct game_t*
