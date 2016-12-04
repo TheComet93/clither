@@ -1,4 +1,5 @@
 #include "game/renderer_impl.h"
+#include "game/vulkan_utils.h"
 #include "game/log.h"
 #include "util/module_loader.h"
 #include "util/memory.h"
@@ -37,9 +38,9 @@ allocation_function(void* pUserData, size_t  size,  size_t  alignment, VkSystemA
     return MALLOC(size, "allocationFunction() (vulkan malloc wrapper)"); /*_aligned_malloc(size, alignment); */
 }
 
-void* reallocation_function(void*   pUserData,   void*   pOriginal,  size_t  size, size_t  alignment,  VkSystemAllocationScope allocationScope)
+void* reallocation_function(void* pUserData, void* pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
 {
-    printf("pAllocator's REallocationFunction: size %u, alignment %u, allocationScope %d \n",
+    printf("pAllocator's REallocationFunction: size %lu, alignment %lu, allocationScope %d \n",
     size, alignment, allocationScope);
     return realloc(pOriginal, size);
  }
@@ -100,6 +101,7 @@ renderer_init(struct renderer_t* renderer, struct game_t* game)
     renderer->vk.application_info.apiVersion = VK_MAKE_VERSION(1, 0, 0);      /* The version of Vulkan we're using */
 
     {
+        VkResult result;
         VkInstanceCreateInfo instanceInfo = {0};
         instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceInfo.pApplicationInfo = &renderer->vk.application_info;
@@ -108,15 +110,18 @@ renderer_init(struct renderer_t* renderer, struct game_t* game)
         instanceInfo.enabledExtensionCount = 0;
         instanceInfo.ppEnabledExtensionNames = NULL;
 
-        if(renderer->vk.vkCreateInstance(
+        result = renderer->vk.vkCreateInstance(
                 &instanceInfo,
                 &g_vkAllocators,
-                &renderer->vk.context.instance) != VK_SUCCESS)
+                &renderer->vk.context.instance);
+        if(result != VK_SUCCESS)
         {
-            log_message(LOG_FATAL, game, "Failed to create vulkan instance");
+            log_message(LOG_FATAL, game, "Failed to create vulkan instance:\n%s", vulkan_result_to_string(result));
             goto create_vulkan_instance_failed;
         }
     }
+
+    load_validation_layer(&renderer->vk);
 
     return 1;
 
