@@ -218,7 +218,7 @@ vulkan_create_instance(struct renderer_t* renderer)
 
     if(result != VK_SUCCESS)
     {
-        log_message(LOG_FATAL, renderer->game, "Failed to create vulkan instance:\n%s", vulkan_result_to_string(result));
+        log_message(LOG_FATAL, renderer->game, "[renderer] Failed to create vulkan instance: %s", vulkan_result_to_string(result));
         return 0;;
     }
 
