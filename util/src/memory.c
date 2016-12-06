@@ -244,7 +244,10 @@ free_wrapper_debug(void* ptr)
             int bt_size, i;
             fprintf(stderr, "  -----------------------------------------\n");
 #   endif
-            fprintf(stderr, "  WARNING: Freeing something that was never allocated\n");
+            if(ptr)
+                fprintf(stderr, "  WARNING: Freeing something that was never allocated\n");
+            else
+                fprintf(stderr, "  WARNING: FREE(NULL)\n");
 #   ifdef ENABLE_MEMORY_BACKTRACE
             if((bt = get_backtrace(&bt_size)))
             {
@@ -265,8 +268,6 @@ free_wrapper_debug(void* ptr)
         ++deallocations;
         free(ptr);
     }
-    else
-        fprintf(stderr, "Warning: free(NULL)\n");
 
     MUTEX_UNLOCK(mutex)
 }

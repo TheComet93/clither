@@ -7,4 +7,6 @@
 
 #   include "game/export.h"
 
+#cmakedefine VULKAN_USE_DEBUG_MALLOC
+
 #endif /* @PROJECT_NAME@_CONFIG_H */

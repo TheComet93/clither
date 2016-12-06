@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cloc util game clither tests/src tests/include scripts gource
