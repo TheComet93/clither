@@ -96,12 +96,12 @@ vulkan_create_instance(struct renderer_t* renderer)
 {
     VkResult result;
     VkInstanceCreateInfo instance_info = {0};
-    
+
     static const char* validation_layer_names[] = {
         "VK_LAYER_LUNARG_standard_validation",
         NULL
     };
-    
+
     static const char* extension_names[] = {
         "VK_KHR_surface",
         "VK_KHR_xlib_surface",
@@ -128,7 +128,7 @@ vulkan_create_instance(struct renderer_t* renderer)
             &instance_info,
             g_allocators_ptr,
             &renderer->vk.context.instance);
-    
+
     vulkan_clean_up_extension_info(&instance_info);
     vulkan_clean_up_validation_layer_info(&instance_info);
 
@@ -160,7 +160,7 @@ vulkan_fill_in_validation_layer_info(const struct renderer_t* renderer,
     uint32_t layer_it;
     uint32_t layer_count;
     VkLayerProperties* layers_available;
-    
+
     assert(instance_info->enabledLayerCount == 0);
     assert(instance_info->ppEnabledLayerNames == NULL);
 
@@ -178,7 +178,7 @@ vulkan_fill_in_validation_layer_info(const struct renderer_t* renderer,
     if(layers_available == NULL)
         return 0;
     renderer->vk.vkEnumerateInstanceLayerProperties(&layer_count, layers_available);
-    
+
     /*
      * Need a separate buffer in which we insert layer names
      * that will be loaded. This buffer is passed to the instance_info struct.
@@ -195,7 +195,7 @@ vulkan_fill_in_validation_layer_info(const struct renderer_t* renderer,
     for(layer_it = 0; layer_it != layer_count; ++layer_it)
         log_message(LOG_INFO, renderer->game, "[renderer]   + %s", layers_available[layer_it].layerName);
 
-    /* 
+    /*
      * Match found layers with the requested layers. Insert
      * matches into ppEnabledLayerNames.
      */
@@ -217,11 +217,11 @@ vulkan_fill_in_validation_layer_info(const struct renderer_t* renderer,
         if(layer_found == 0)
             log_message(LOG_WARNING, renderer->game, "[renderer] Couldn't find layer with name %s", *layer_name_it);
     }
-    
+
     instance_info->ppEnabledLayerNames = ppEnabledLayerNames;
 
     FREE(layers_available);
-    
+
     return 1;
 }
 
@@ -229,9 +229,12 @@ vulkan_fill_in_validation_layer_info(const struct renderer_t* renderer,
 void
 vulkan_clean_up_validation_layer_info(VkInstanceCreateInfo* instance_info)
 {
-    assert(instance_info->enabledLayerCount != 0);
-    assert(instance_info->ppEnabledLayerNames != NULL);
-    
+    if(instance_info->enabledLayerCount != 0)
+    {
+        assert(instance_info->ppEnabledLayerNames == NULL);
+        return;
+    }
+
     FREE((void*)instance_info->ppEnabledLayerNames);
     instance_info->enabledLayerCount = 0;
     instance_info->ppEnabledLayerNames = NULL;
@@ -249,7 +252,7 @@ vulkan_fill_in_extension_info(const struct renderer_t* renderer,
     uint32_t extension_count;
     VkExtensionProperties* extensions_available;
     char extension_found;
-    
+
     assert(instance_info->enabledExtensionCount == 0);
     assert(instance_info->ppEnabledExtensionNames == NULL);
 
@@ -267,7 +270,7 @@ vulkan_fill_in_extension_info(const struct renderer_t* renderer,
     if(extensions_available == NULL)
         return 0;
     renderer->vk.vkEnumerateInstanceExtensionProperties(NULL, &extension_count, extensions_available);
-    
+
     /*
      * Need a separate buffer in which we insert extension names
      * that will be loaded. This buffer is passed to the instance_info struct.
@@ -284,7 +287,7 @@ vulkan_fill_in_extension_info(const struct renderer_t* renderer,
     for(extension_it = 0; extension_it != extension_count; ++extension_it)
         log_message(LOG_INFO, renderer->game, "[renderer]   + %s", extensions_available[extension_it].extensionName);
 
-    /* 
+    /*
      * Match found extensions with the requested extensions. Insert
      * matches into ppEnabledExtensionNames.
      */
@@ -306,11 +309,11 @@ vulkan_fill_in_extension_info(const struct renderer_t* renderer,
         if(extension_found == 0)
             log_message(LOG_WARNING, renderer->game, "[renderer] Couldn't find extension with name %s", *extension_name_it);
     }
-    
+
     instance_info->ppEnabledExtensionNames = ppEnabledExtensionNames;
 
     FREE(extensions_available);
-    
+
     return 1;
 }
 
@@ -318,9 +321,12 @@ vulkan_fill_in_extension_info(const struct renderer_t* renderer,
 void
 vulkan_clean_up_extension_info(VkInstanceCreateInfo* instance_info)
 {
-    assert(instance_info->enabledExtensionCount != 0);
-    assert(instance_info->ppEnabledExtensionNames != NULL);
-    
+    if(instance_info->enabledExtensionCount == 0)
+    {
+        assert(instance_info->ppEnabledExtensionNames == NULL);
+        return;
+    }
+
     FREE((void*)instance_info->ppEnabledExtensionNames);
     instance_info->enabledExtensionCount = 0;
     instance_info->ppEnabledExtensionNames = NULL;
