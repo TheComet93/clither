@@ -17,9 +17,10 @@ struct vulkan_t
 
     struct vulkan_context_t context;
 
-    PFN_vkCreateInstance                    vkCreateInstance;
-    PFN_vkDestroyInstance                   vkDestroyInstance;
-    PFN_vkEnumerateInstanceLayerProperties  vkEnumerateInstanceLayerProperties;
+    PFN_vkCreateInstance                       vkCreateInstance;
+    PFN_vkDestroyInstance                      vkDestroyInstance;
+    PFN_vkEnumerateInstanceLayerProperties     vkEnumerateInstanceLayerProperties;
+    PFN_vkEnumerateInstanceExtensionProperties vkEnumerateInstanceExtensionProperties;
 };
 
 struct renderer_t

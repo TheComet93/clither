@@ -85,6 +85,8 @@ create_vcproj_userfile (game)
 
 add_custom_command (TARGET game POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy "${VULKAN_ROOT}/${VULKAN_ARCHITECTURE}/lib/*" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_custom_command (TARGET game POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy "${VULKAN_ROOT}/${VULKAN_ARCHITECTURE}/etc/explicit_layer.d/*.json" ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 ###############################################################################
 # install targets
