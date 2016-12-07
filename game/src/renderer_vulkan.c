@@ -229,7 +229,7 @@ vulkan_fill_in_validation_layer_info(const struct renderer_t* renderer,
 void
 vulkan_clean_up_validation_layer_info(VkInstanceCreateInfo* instance_info)
 {
-    if(instance_info->enabledLayerCount != 0)
+    if(instance_info->enabledLayerCount == 0)
     {
         assert(instance_info->ppEnabledLayerNames == NULL);
         return;
