@@ -229,13 +229,8 @@ vulkan_fill_in_validation_layer_info(const struct renderer_t* renderer,
 void
 vulkan_clean_up_validation_layer_info(VkInstanceCreateInfo* instance_info)
 {
-    if(instance_info->enabledLayerCount == 0)
-    {
-        assert(instance_info->ppEnabledLayerNames == NULL);
-        return;
-    }
-
-    FREE((void*)instance_info->ppEnabledLayerNames);
+    if(instance_info->ppEnabledLayerNames != NULL)
+        FREE((void*)instance_info->ppEnabledLayerNames);
     instance_info->enabledLayerCount = 0;
     instance_info->ppEnabledLayerNames = NULL;
 }
@@ -321,13 +316,8 @@ vulkan_fill_in_extension_info(const struct renderer_t* renderer,
 void
 vulkan_clean_up_extension_info(VkInstanceCreateInfo* instance_info)
 {
-    if(instance_info->enabledExtensionCount == 0)
-    {
-        assert(instance_info->ppEnabledExtensionNames == NULL);
-        return;
-    }
-
-    FREE((void*)instance_info->ppEnabledExtensionNames);
+    if(instance_info->ppEnabledExtensionNames != NULL)
+        FREE((void*)instance_info->ppEnabledExtensionNames);
     instance_info->enabledExtensionCount = 0;
     instance_info->ppEnabledExtensionNames = NULL;
 }
