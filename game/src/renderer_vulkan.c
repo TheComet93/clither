@@ -120,25 +120,29 @@ vulkan_create_instance(struct renderer_t* renderer)
     instance_info.pApplicationInfo = &renderer->vk.application_info;
 
     if(!vulkan_fill_in_validation_layer_info(renderer, validation_layer_names, &instance_info))
-        return 0;
+        goto fill_in_validation_layer_info_failed;
     if(!vulkan_fill_in_extension_info(renderer, extension_names, &instance_info))
-        return 0;
+        goto fill_in_extension_info_failed;
 
     result = renderer->vk.vkCreateInstance(
             &instance_info,
             g_allocators_ptr,
             &renderer->vk.context.instance);
 
-    vulkan_clean_up_extension_info(&instance_info);
-    vulkan_clean_up_validation_layer_info(&instance_info);
-
     if(result != VK_SUCCESS)
     {
         log_message(LOG_FATAL, renderer->game, "[renderer] Failed to create vulkan instance: %s", vulkan_result_to_string(result));
-        return 0;
+        goto create_instance_failed;
     }
 
+    vulkan_clean_up_extension_info(&instance_info);
+    vulkan_clean_up_validation_layer_info(&instance_info);
+
     return 1;
+
+    create_instance_failed               : vulkan_clean_up_extension_info(&instance_info);
+    fill_in_extension_info_failed        : vulkan_clean_up_validation_layer_info(&instance_info);
+    fill_in_validation_layer_info_failed : return 0;
 }
 
 /* ------------------------------------------------------------------------- */

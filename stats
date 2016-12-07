@@ -6,14 +6,12 @@ import re
 
 aliases = {
     # alias
-    "TheComet": "Alex Murray"
+    "Alex Murray": "TheComet",
+    "TheComet93": "TheComet"
 }
 
 exclude_folders = [
-    'tests/googletest',
-    'tests/googlemock',
-    'pugixml-1.7',
-    'qwt-6.1.2'
+    'tests/gmock'
 ]
 
 def get_real_name(alias):
