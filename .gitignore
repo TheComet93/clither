@@ -32,6 +32,9 @@
 # project files
 *.kdev4
 .idea/
+.codelite/
+clither.project
+clither.workspace
 
 # Mac OS X
 .DS_Store

@@ -13,7 +13,7 @@ static uintptr_t
 safe_strlen(const char* str)
 {
     if(str)
-    	return strlen(str);
+        return strlen(str);
     return 0;
 }
 
@@ -23,7 +23,7 @@ safe_strcat(char* target, const char* source)
 {
     assert(target);
     if(source)
-    	strcat(target, source);
+        strcat(target, source);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -31,7 +31,7 @@ static uintptr_t
 safe_wcslen(const wchar_t* wcs)
 {
     if(wcs)
-    	return wcslen(wcs);
+        return wcslen(wcs);
     return 0;
 }
 
@@ -41,7 +41,7 @@ safe_wcscat(wchar_t* target, const wchar_t* source)
 {
     assert(target);
     if(source)
-    	wcscat(target, source);
+        wcscat(target, source);
 }
 
 /* ----------------------------------------------------------------------------
@@ -67,21 +67,21 @@ cat_strings(uint32_t num_strs, ...)
      * to contain all strings plus a null terminator */
     va_start(ap, num_strs);
     for(i = 0; i != num_strs; ++i)
-    	total_length += safe_strlen(va_arg(ap, char*));
+        total_length += safe_strlen(va_arg(ap, char*));
     va_end(ap);
 
     buffer = (char*)MALLOC((total_length+1) * sizeof(char), "cat_strings()");
     if(!buffer)
     {
-    	fprintf(stderr, "malloc() failed in cat_strings() -- not enough memory\n");
-    	return NULL;
+        fprintf(stderr, "malloc() failed in cat_strings() -- not enough memory\n");
+        return NULL;
     }
     *buffer = '\0'; /* so strcat works */
 
     /* concatenate all strings into the allocated buffer */
     va_start(ap, num_strs);
     for(i = 0; i != num_strs; ++i)
-    	safe_strcat(buffer, va_arg(ap, char*));
+        safe_strcat(buffer, va_arg(ap, char*));
     va_end(ap);
 
     return buffer;
@@ -97,8 +97,8 @@ malloc_string(const char* str)
     buffer = (char*)MALLOC((strlen(str)+1) * sizeof(char), "malloc_string()");
     if(!buffer)
     {
-    	fprintf(stderr, "malloc() failed in malloc_string() -- not enough memory\n");
-    	return NULL;
+        fprintf(stderr, "malloc() failed in malloc_string() -- not enough memory\n");
+        return NULL;
     }
 
     strcpy(buffer, str);
@@ -118,21 +118,21 @@ cat_wstrings(uint32_t num_strs, ...)
      * to contain all strings plus a null terminator */
     va_start(ap, num_strs);
     for(i = 0; i != num_strs; ++i)
-    	total_length += safe_wcslen(va_arg(ap, wchar_t*));
+        total_length += safe_wcslen(va_arg(ap, wchar_t*));
     va_end(ap);
 
     buffer = (wchar_t*)MALLOC((total_length+1) * sizeof(wchar_t), "cat_wstrings()");
     if(!buffer)
     {
-    	fprintf(stderr, "malloc() failed in cat_wstrings() -- not enough memory\n");
-    	return NULL;
+        fprintf(stderr, "malloc() failed in cat_wstrings() -- not enough memory\n");
+        return NULL;
     }
     *buffer = L'\0'; /* so wcscat works */
 
     /* concatenate all strings into the allocated buffer */
     va_start(ap, num_strs);
     for(i = 0; i != num_strs; ++i)
-    	safe_wcscat(buffer, va_arg(ap, wchar_t*));
+        safe_wcscat(buffer, va_arg(ap, wchar_t*));
     va_end(ap);
 
     return buffer;
@@ -148,8 +148,8 @@ malloc_wstring(const wchar_t* wcs)
     buffer = (wchar_t*)MALLOC((wcslen(wcs)+1) * sizeof(wchar_t), "malloc_wstring()");
     if(!buffer)
     {
-    	fprintf(stderr, "malloc() failed in malloc_wstring() -- not enough memory\n");
-    	return NULL;
+        fprintf(stderr, "malloc() failed in malloc_wstring() -- not enough memory\n");
+        return NULL;
     }
 
     wcscpy(buffer, wcs);
@@ -164,27 +164,27 @@ strtok_r_portable(char* str, char delimiter, char** saveptr)
     char* end_ptr;
 
     if(str)
-    	*saveptr = str - 1;
+        *saveptr = str - 1;
 
     /* no more tokens */
     if(!*saveptr)
-    	return NULL;
+        return NULL;
 
     /* get first occurrence of token in string */
     begin_ptr = *saveptr + 1;
     end_ptr = (char*)strchr(begin_ptr, delimiter);
     if(!end_ptr)
-    	*saveptr = NULL; /* last token has been reached */
+        *saveptr = NULL; /* last token has been reached */
     else
     {
-    	/* update saveptr and replace delimiter with null terminator */
-    	*saveptr = end_ptr;
-    	**saveptr = '\0';
+        /* update saveptr and replace delimiter with null terminator */
+        *saveptr = end_ptr;
+        **saveptr = '\0';
     }
 
     /* empty tokens */
     if(*begin_ptr == '\0')
-    	return NULL;
+        return NULL;
     return begin_ptr;
 }
 
@@ -203,12 +203,12 @@ strtowcs(const char* str)
     wcs = (wchar_t*)MALLOC((len + 1) * sizeof(wchar_t), "strtowcs()");
     if(!wcs)
     {
-    	fprintf(stderr, "malloc() failed in strtowcs() -- not enough memory\n");
-    	return NULL;
+        fprintf(stderr, "malloc() failed in strtowcs() -- not enough memory\n");
+        return NULL;
     }
 
     for(wcs_it = wcs; *str; ++str)
-    	*wcs_it++ = (wchar_t)*str;
+        *wcs_it++ = (wchar_t)*str;
     *wcs_it = L'\0';
     return wcs;
 }
@@ -228,12 +228,12 @@ wcstostr(const wchar_t* wcs)
     str = (char*)MALLOC((len + 1) * sizeof(char), "wcstostr()");
     if(!str)
     {
-    	fprintf(stderr, "malloc() failed in wcstostr() -- not enough memory\n");
-    	return NULL;
+        fprintf(stderr, "malloc() failed in wcstostr() -- not enough memory\n");
+        return NULL;
     }
 
     for(str_it = str; *wcs; ++wcs)
-    	*str_it++ = (char)*wcs;
+        *str_it++ = (char)*wcs;
     *str_it = '\0';
     return str;
 }
@@ -249,14 +249,14 @@ crlf2lf(char* src)
     target = src;
     while(*src)
     {
-    	if(*src == '\r') /* skip any CRs */
-    		++src;
-    	*target++ = *src++;
+        if(*src == '\r') /* skip any CRs */
+            ++src;
+        *target++ = *src++;
     }
 
     /* if at least one CR was skipped, a new null-terminator must be set. */
     if(target != src)
-    	*target = '\0';
+        *target = '\0';
 }
 
 /* ------------------------------------------------------------------------- */
@@ -270,9 +270,9 @@ string_reverse(char* str)
     end = str + strlen(str) - 1;
     for(; str < end; ++str, --end)
     {
-    	char tmp = *str;
-    	*str = *end;
-    	*end = tmp;
+        char tmp = *str;
+        *str = *end;
+        *end = tmp;
     }
 }
 
@@ -286,5 +286,5 @@ string_tolower(char* str)
      */
     char* p;
     for(p = str; *p; ++p)
-    	*p = *p > 0x40 && *p < 0x5b ? *p | 0x60 : *p;
+        *p = *p > 0x40 && *p < 0x5b ? *p | 0x60 : *p;
 }
