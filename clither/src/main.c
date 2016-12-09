@@ -3,6 +3,8 @@
 #include "clither/argv.h"
 #include "game/game.h"
 
+#include <stdio.h>
+
 int
 main(int argc, char** argv)
 {

@@ -93,7 +93,9 @@ elseif (${CMAKE_C_COMPILER_ID} STREQUAL "MSVC")
 endif ()
 
 if (CMAKE_BUILD_TYPE MATCHES Release)
-    add_definitions(-DNDEBUG)
+    add_definitions (-DNDEBUG)
+else ()
+    add_definitions (-DDEBUG)
 endif ()
 
 ###############################################################################

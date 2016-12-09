@@ -33,7 +33,7 @@ void* reallocation_function(void* pUserData, void* pOriginal, size_t size, size_
     size, alignment, allocationScope);
     assert(0);
     return realloc(pOriginal, size);
- }
+}
 
 void
 free_function(void* pUserData, void* pMemory)
@@ -59,6 +59,9 @@ VkAllocationCallbacks* g_allocators_ptr = NULL;
 char
 vulkan_load_library(struct renderer_t* renderer)
 {
+    assert(renderer);
+    assert(renderer->vk.module == NULL);
+
     renderer->vk.module = module_open(VULKAN_LIB);
     if(renderer->vk.module == NULL)
         goto open_module_failed;
@@ -97,17 +100,18 @@ vulkan_create_instance(struct renderer_t* renderer)
     VkResult result;
     VkInstanceCreateInfo instance_info = {0};
 
+#ifdef DEBUG
+    /* During debug, load this list of layers */
     static const char* validation_layer_names[] = {
         "VK_LAYER_LUNARG_standard_validation",
         NULL
     };
-
-    static const char* extension_names[] = {
-        "VK_KHR_surface",
-        "VK_KHR_xlib_surface",
-        "VK_EXT_debug_report",
-        NULL
-    };
+#else
+    /* During release, load no layers */
+    static const char* validation_layer_names[] = {
+        NULL;
+    }
+#endif
 
     renderer->vk.application_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO; /* sType is a member of all structs  */
     renderer->vk.application_info.pNext = NULL;                               /* as is pNext and flag              */
@@ -155,7 +159,6 @@ vulkan_destroy_instance(struct renderer_t* renderer)
 /* ------------------------------------------------------------------------- */
 char
 vulkan_fill_in_validation_layer_info(const struct renderer_t* renderer,
-                                     const char** validation_layer_names,
                                      VkInstanceCreateInfo* instance_info)
 {
     const char** layer_name_it;
@@ -164,6 +167,8 @@ vulkan_fill_in_validation_layer_info(const struct renderer_t* renderer,
     uint32_t layer_it;
     uint32_t layer_count;
     VkLayerProperties* layers_available;
+
+
 
     assert(instance_info->enabledLayerCount == 0);
     assert(instance_info->ppEnabledLayerNames == NULL);
@@ -242,15 +247,20 @@ vulkan_clean_up_validation_layer_info(VkInstanceCreateInfo* instance_info)
 /* ------------------------------------------------------------------------- */
 char
 vulkan_fill_in_extension_info(const struct renderer_t* renderer,
-                              const char** extension_names,
                               VkInstanceCreateInfo* instance_info)
 {
     const char** extension_name_it;
-    const char** ppEnabledExtensionNames;
     uint32_t extension_it;
     uint32_t extension_count;
     VkExtensionProperties* extensions_available;
     char extension_found;
+
+    static const char* extension_names[] = {
+        "VK_KHR_surface",
+        "VK_KHR_xcb_surface",
+        "VK_EXT_debug_report",
+        NULL
+    };
 
     assert(instance_info->enabledExtensionCount == 0);
     assert(instance_info->ppEnabledExtensionNames == NULL);
@@ -274,8 +284,9 @@ vulkan_fill_in_extension_info(const struct renderer_t* renderer,
      * Need a separate buffer in which we insert extension names
      * that will be loaded. This buffer is passed to the instance_info struct.
      */
-    ppEnabledExtensionNames = (const char**)MALLOC(extension_count * sizeof(char*), "vulkan_fill_in_extension_info()");
-    if(ppEnabledExtensionNames == NULL)
+    instance_info->ppEnabledExtensionNames = (const char*const*)MALLOC(
+        extension_count * sizeof(char*), "vulkan_fill_in_extension_info()");
+    if(instance_info->ppEnabledExtensionNames == NULL)
     {
         FREE(extensions_available);
         return 0;
